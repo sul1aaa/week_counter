@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Week Counter</string>
+    <string name="widget_name">Week Counter</string>
+    <string name="widget_description">Countdown to your next weekend or holiday</string>
+    <string name="widget_placeholder">Open the app to set up</string>
+</resources>
