@@ -17,6 +17,8 @@ flutter test
 flutter run
 ```
 
+The project pins Flutter 3.44.9 with fvm (`.fvmrc`), and `.vscode/settings.json` points VS Code at the same SDK. Keep the terminal and the editor on one SDK. Otherwise each one's `pub get` regenerates `ios/Flutter/ephemeral` its own way, and the iOS build fails with "Missing package product" or "home-widget requires 14.0".
+
 ## Code map
 
 | Path | What |
