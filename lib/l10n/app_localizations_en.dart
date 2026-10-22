@@ -18,9 +18,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navCalendar => 'Calendar';
 
   @override
-  String get navSettings => 'Settings';
-
-  @override
   String get untilWeekend => 'Weekend in';
 
   @override
@@ -63,11 +60,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String inDuration(String duration) {
-    return 'in $duration';
-  }
-
-  @override
   String get dayShort => 'd';
 
   @override
@@ -90,9 +82,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noneComing => 'None in the next year';
-
-  @override
-  String get upcomingDaysOff => 'Upcoming days off';
 
   @override
   String get noWorkdaysTitle => 'No workdays set';
@@ -123,16 +112,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retry => 'Retry';
 
   @override
-  String get legendWeekend => 'Weekend';
+  String get legendWeekend => 'weekends';
 
   @override
-  String get legendHoliday => 'Holiday';
+  String get legendHoliday => 'holiday';
 
   @override
-  String get legendDayOff => 'Your day off';
-
-  @override
-  String get legendWorkday => 'Extra workday';
+  String get legendDayOff => 'vacation';
 
   @override
   String get calendarHint =>
@@ -186,9 +172,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetToAuto => 'Reset';
 
   @override
-  String get sectionHolidays => 'Public holidays';
-
-  @override
   String get country => 'Country';
 
   @override
@@ -215,25 +198,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadFailed => 'Couldn\'t load. Check your internet connection.';
 
   @override
-  String get sectionWorkTime => 'Working time';
-
-  @override
   String get workdays => 'Workdays';
-
-  @override
-  String get shiftStarts => 'Shift starts';
-
-  @override
-  String get shiftEnds => 'Shift ends';
 
   @override
   String get endsNextDay => 'Ends the next day';
 
   @override
   String get perDayHours => 'Different hours per day';
-
-  @override
-  String get sectionWidget => 'Home screen widget';
 
   @override
   String get addWidget => 'Add widget to home screen';
@@ -247,14 +218,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allow => 'Allow';
-
-  @override
-  String get widgetHowToAndroid =>
-      'Long-press the home screen, open Widgets and find Week Counter.';
-
-  @override
-  String get widgetHowToIos =>
-      'Long-press the home screen, tap Edit › Add Widget and search for Week Counter.';
 
   @override
   String get sectionAbout => 'About';
@@ -386,12 +349,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eyebrowHolidayLeft => 'holiday';
 
   @override
-  String get eyebrowDaysOffStrike => 'work';
-
-  @override
-  String get eyebrowDaysOffLeft => 'still off for';
-
-  @override
   String weekDone(int percent) {
     return '$percent% of the week done';
   }
@@ -433,15 +390,6 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get aheadLongWeekend => 'Long weekend ahead';
-
-  @override
-  String get aheadHoliday => 'Holiday ahead';
-
-  @override
-  String get aheadDaysOff => 'Time off ahead';
 
   @override
   String get widgetTipTitle => 'Countdown on your home screen';
@@ -516,7 +464,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Changes save right away. The countdown and widget update on their own.';
 
   @override
-  String get workdaysHint => 'Tap a day to make it a workday or a day off';
+  String get workdaysHint => 'Tap a day to pick your own';
 
   @override
   String get shiftStartsAt => 'Starts';
@@ -560,6 +508,246 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get celebrateCta => 'Yay, time to rest';
+
+  @override
+  String get navAwards => 'Awards';
+
+  @override
+  String get scheduleTitle => 'Schedule';
+
+  @override
+  String get weekHeader => 'Week';
+
+  @override
+  String get weekStarts => 'Week starts';
+
+  @override
+  String get weekEnds => 'Week ends';
+
+  @override
+  String get holidaysShort => 'Holidays';
+
+  @override
+  String get holidaysShortHint => 'Short weeks and transfers';
+
+  @override
+  String get sectionExtras => 'Widgets and effects';
+
+  @override
+  String get confetti => 'Confetti';
+
+  @override
+  String get confettiHint =>
+      'With Reduce Motion on, you get a still card instead';
+
+  @override
+  String weeksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks',
+      one: '1 week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get vacationTitle => 'Vacation';
+
+  @override
+  String get vacationNone => 'None';
+
+  @override
+  String get vacationIntro =>
+      'On vacation we count the days until you\'re back. Weeks for awards are kept.';
+
+  @override
+  String get vacationHowLong => 'How long';
+
+  @override
+  String get vacationFrom => 'Starting';
+
+  @override
+  String vacationWeeks(int count) {
+    return '$count wk';
+  }
+
+  @override
+  String get vacationFromTomorrow => 'Tomorrow';
+
+  @override
+  String get vacationFromMonday => 'Monday';
+
+  @override
+  String vacationGo(String days) {
+    return 'Go on vacation for $days';
+  }
+
+  @override
+  String get vacationActive => 'You\'re on vacation';
+
+  @override
+  String get vacationPlanned => 'Vacation planned';
+
+  @override
+  String vacationActiveBody(String date) {
+    return 'Until $date inclusive. We count the days until you\'re back; weeks for awards are kept.';
+  }
+
+  @override
+  String vacationPlannedBody(String from, String to) {
+    return 'From $from to $to inclusive. We count the days until you\'re back; weeks for awards are kept.';
+  }
+
+  @override
+  String get vacationEndEarly => 'Come back early';
+
+  @override
+  String get vacationCancel => 'Cancel vacation';
+
+  @override
+  String get vacationNote => 'Vacation';
+
+  @override
+  String untilInclusive(String date) {
+    return 'Until $date inclusive';
+  }
+
+  @override
+  String holidayMidweek(String when) {
+    return 'A holiday mid-week. Back to work $when';
+  }
+
+  @override
+  String get eyebrowVacationPrefix => 'vacation · until';
+
+  @override
+  String get eyebrowVacationStrike => 'work';
+
+  @override
+  String get eyebrowVacationSuffix => 'you\'re back';
+
+  @override
+  String get onbSkip => 'Skip';
+
+  @override
+  String get onbStart => 'Get started';
+
+  @override
+  String get onbNext => 'Next';
+
+  @override
+  String onbStep(int n, int m) {
+    return 'Step $n of $m';
+  }
+
+  @override
+  String get onbWelcomePrefix => 'Counting down to';
+
+  @override
+  String get onbWelcomeStrike => 'Friday';
+
+  @override
+  String get onbWelcomeSuffix => 'freedom';
+
+  @override
+  String get onbWelcomeBody =>
+      'Tell us when your work week ends. The orb fills up toward the weekend, and there\'s a small party when it arrives.';
+
+  @override
+  String get onbTypeTitle => 'How do you work?';
+
+  @override
+  String get onbFiveDay => 'Five-day week';
+
+  @override
+  String get onbFiveDayHint => 'Mon–Fri, weekends on Saturday and Sunday';
+
+  @override
+  String get onbCustom => 'Your own schedule';
+
+  @override
+  String get onbCustomHint => 'Your own days, for example Tue–Sat';
+
+  @override
+  String get onbTimeTitle => 'When is your work week?';
+
+  @override
+  String get onbWidgetBody =>
+      'The widget shows how much is left, even when the app is closed.';
+
+  @override
+  String get onbHowToWidget => 'How to add the widget';
+
+  @override
+  String get onbNotNow => 'Not now';
+
+  @override
+  String get awardsHero => 'times you made it\nto the weekend';
+
+  @override
+  String awardsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count awards',
+      one: '1 award',
+      zero: 'no awards yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String awardsMore(int count) {
+    return 'and $count more';
+  }
+
+  @override
+  String get awardsWeekly => 'Weeks';
+
+  @override
+  String get awardsSpecial => 'Special';
+
+  @override
+  String awardsProgress(int got, int total) {
+    return '$got of $total earned';
+  }
+
+  @override
+  String get awardLocked => 'not earned yet';
+
+  @override
+  String awardEarnedOn(String date) {
+    return 'earned $date';
+  }
+
+  @override
+  String awardWeeksLeft(String weeks) {
+    return '$weeks to go';
+  }
+
+  @override
+  String awardNew(String name) {
+    return 'New award: $name';
+  }
+
+  @override
+  String celebrateWeeks(String weeks) {
+    return '$weeks behind you';
+  }
+
+  @override
+  String celebrateNext(String weeks, String name) {
+    return '$weeks to “$name”';
+  }
+
+  @override
+  String get celebrateAllDone => 'Every weekly award is yours';
+
+  @override
+  String atNight(String day) {
+    return '$day, at night';
+  }
 
   @override
   String get widgetSetUp => 'Open the app to set up';

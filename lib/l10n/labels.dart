@@ -4,6 +4,7 @@ import '../core/calendar_date.dart';
 import '../domain/countdown_engine.dart';
 import '../models/holiday.dart';
 import 'app_localizations.dart';
+import 'country_names.dart';
 
 /// Wording and date formats shared by the app and the home-screen widget.
 extension Labels on AppLocalizations {
@@ -35,6 +36,26 @@ extension Labels on AppLocalizations {
     };
     return names.isEmpty ? null : names.join(', ');
   }
+
+  /// The country's name in the app's language; [english] is the API's name.
+  String countryLabel(String code, [String? english]) =>
+      (localeName.startsWith('ru') ? countryNamesRu[code] : null) ??
+      english ??
+      code;
+
+  /// "October 23", "23 октября".
+  String dayMonth(CalendarDate date) =>
+      DateFormat.MMMMd(localeName).format(date.startOfDay);
+
+  /// "Wed, October 21", "Ср, 21 октября": the heading of the week screen.
+  String dateHeading(CalendarDate date) {
+    final day = DateFormat.E(localeName).format(date.startOfDay);
+    return '${day[0].toUpperCase()}${day.substring(1)}, ${dayMonth(date)}';
+  }
+
+  /// "26.10", "10/26": compact, for value columns.
+  String shortDate(CalendarDate date) =>
+      DateFormat.Md(localeName).format(date.startOfDay);
 
   /// "Fri, Oct 23".
   String date(CalendarDate date) =>

@@ -4,11 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '../../domain/awards.dart';
 import '../../domain/countdown_engine.dart';
 import '../../l10n/app_localizations.dart';
+import '../../l10n/award_copy.dart';
 import '../../l10n/labels.dart';
 import '../../state/app_controller.dart';
+import '../kit/award_badge.dart';
 import '../kit/buttons.dart';
+import '../kit/pressable.dart';
 import '../kit/glass.dart';
 import '../kit/orb.dart';
 import '../kit/strike.dart';
@@ -21,24 +25,30 @@ class CelebrateScreen extends StatefulWidget {
     super.key,
     required this.controller,
     required this.block,
+    this.award,
   });
 
   final AppController controller;
   final OffBlock block;
 
-  static Future<void> open(
+  /// An award earned as this time off started.
+  final String? award;
+
+  /// Resolves to the award to show when the person taps its badge.
+  static Future<String?> open(
     BuildContext context,
     AppController controller,
-    OffBlock block,
-  ) {
+    OffBlock block, {
+    String? award,
+  }) {
     HapticFeedback.heavyImpact();
     return Navigator.of(context).push(
-      PageRouteBuilder<void>(
+      PageRouteBuilder<String>(
         fullscreenDialog: true,
         transitionDuration: Motion.fast,
         reverseTransitionDuration: const Duration(milliseconds: 300),
         pageBuilder: (_, _, _) =>
-            CelebrateScreen(controller: controller, block: block),
+            CelebrateScreen(controller: controller, block: block, award: award),
         transitionsBuilder: (_, animation, _, child) =>
             FadeTransition(opacity: animation, child: child),
       ),
@@ -104,6 +114,7 @@ class _CelebrateScreenState extends State<CelebrateScreen>
       return;
     }
     _timeline.forward();
+    if (!widget.controller.prefs.confetti) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final size = MediaQuery.sizeOf(context);
@@ -142,7 +153,8 @@ class _CelebrateScreenState extends State<CelebrateScreen>
         : back == null
         ? l10n.celebrateBodyOpen
         : l10n.celebrateBody(l10n.humanDuration(back.difference(now)));
-    final details = l10n.blockDetails(block);
+    final weeks = widget.controller.prefs.weeks;
+    final next = nextWeeklyAward(weeks);
     final width = media.size.width;
     final titleSize = (width * 0.17).clamp(48, 76).toDouble();
 
@@ -214,6 +226,10 @@ class _CelebrateScreenState extends State<CelebrateScreen>
                             Text(
                               (belated
                                       ? l10n.celebrateLateEyebrow
+                                      : weeks > 0
+                                      ? l10n.celebrateWeeks(
+                                          l10n.weeksCount(weeks),
+                                        )
                                       : l10n.celebrateEyebrow)
                                   .toUpperCase(),
                               textAlign: TextAlign.center,
@@ -275,16 +291,52 @@ class _CelebrateScreenState extends State<CelebrateScreen>
                             const SizedBox(height: 28),
                             _Reveal(
                               animation: _badge,
-                              child: _Badge(
-                                title: l10n.daysOffCount(block.length),
-                                subtitle:
-                                    details ??
-                                    (back == null
-                                        ? l10n.noWorkAhead
-                                        : l10n.backToWorkAt(
-                                            l10n.shortWhen(back, now),
-                                          )),
-                              ),
+                              child: widget.award != null
+                                  ? Pressable(
+                                      onTap: () => Navigator.of(
+                                        context,
+                                      ).pop(widget.award),
+                                      child: _Badge(
+                                        leading: AwardBadge(
+                                          award: awardById(widget.award!),
+                                          mark: awardCopy(
+                                            l10n.localeName,
+                                            widget.award!,
+                                          ).mark,
+                                          size: 48,
+                                        ),
+                                        title: l10n.awardNew(
+                                          awardCopy(
+                                            l10n.localeName,
+                                            widget.award!,
+                                          ).name,
+                                        ),
+                                        subtitle: awardCopy(
+                                          l10n.localeName,
+                                          widget.award!,
+                                        ).why,
+                                      ),
+                                    )
+                                  : _Badge(
+                                      leading: const Icon(
+                                        Icons.emoji_events_rounded,
+                                        color: Colors.white,
+                                      ),
+                                      title: l10n.celebrateWeeks(
+                                        l10n.weeksCount(weeks),
+                                      ),
+                                      subtitle: next == null
+                                          ? l10n.celebrateAllDone
+                                          : l10n.celebrateNext(
+                                              l10n.weeksCount(
+                                                next.weeks! - weeks,
+                                              ),
+                                              awardCopy(
+                                                l10n.localeName,
+                                                next.id,
+                                              ).name,
+                                            ),
+                                    ),
                             ),
                           ],
                         ),
@@ -468,8 +520,13 @@ class _Reveal extends StatelessWidget {
 }
 
 class _Badge extends StatelessWidget {
-  const _Badge({required this.title, required this.subtitle});
+  const _Badge({
+    required this.leading,
+    required this.title,
+    required this.subtitle,
+  });
 
+  final Widget leading;
   final String title;
   final String subtitle;
 
@@ -488,12 +545,7 @@ class _Badge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconTile(
-            icon: Icons.celebration_rounded,
-            size: 40,
-            background: Tokens.lime,
-            foreground: const Color(0xFF111111),
-          ),
+          leading,
           const SizedBox(width: 12),
           Flexible(
             child: Column(

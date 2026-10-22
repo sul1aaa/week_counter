@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../../core/calendar_date.dart';
 import '../../domain/countdown_engine.dart';
 import '../../l10n/app_localizations.dart';
+import '../../l10n/award_copy.dart';
 import '../../l10n/jokes.dart';
 import '../../l10n/labels.dart';
 import '../../state/app_controller.dart';
@@ -15,14 +16,18 @@ import '../kit/app_page.dart';
 import '../kit/buttons.dart';
 import '../kit/controls.dart';
 import '../kit/countdown_text.dart';
+import '../kit/glass.dart';
 import '../kit/orb.dart';
 import '../kit/strike.dart';
+import '../kit/toast.dart';
 import '../root_shell.dart';
 import '../theme/tokens.dart';
 import '../widgets/joke_carousel.dart';
 import '../widgets/week_strip.dart';
 import '../widgets/widget_sheet.dart';
 import 'country_picker_screen.dart';
+import 'schedule_screen.dart';
+import 'vacation_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -56,6 +61,16 @@ class _HomeScreenState extends State<HomeScreen> {
         _controller.recompute();
       } else {
         setState(() {});
+      }
+      if (_controller.snapshot.state case CountingDown(:final target)
+          when target.difference(now) <= const Duration(minutes: 1) &&
+              _controller.earn('lastMinute') &&
+              mounted) {
+        final l10n = AppLocalizations.of(context);
+        showToast(
+          context,
+          l10n.awardNew(awardCopy(l10n.localeName, 'lastMinute').name),
+        );
       }
     });
   }
@@ -110,9 +125,14 @@ class _HomeScreenState extends State<HomeScreen> {
             alignment: Alignment.centerLeft,
             widthFactor: 1,
             child: Text(
-              l10n.date(today),
+              l10n.dateHeading(today),
               style: t.callout.copyWith(fontWeight: FontWeight.w600),
             ),
+          ),
+          trailing: GlassButton(
+            icon: Icons.tune_rounded,
+            label: l10n.scheduleTitle,
+            onTap: () => ScheduleScreen.open(context, _controller),
           ),
           onRefresh: () => _controller.refreshHolidays(force: true),
           children: [
@@ -122,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 state: state,
                 now: now,
                 fontSize: (width * 0.21).clamp(56, 88).toDouble(),
-                onOpenSettings: () => widget.onOpenTab(AppTab.settings),
+                onOpenSettings: () => ScheduleScreen.open(context, _controller),
                 onOpenCalendar: () => widget.onOpenTab(AppTab.calendar),
               ),
             ),
@@ -203,60 +223,40 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    String details(OffBlock block) => [
-      ?l10n.blockDetails(block),
-      l10n.dateRange(block.first, block.last),
-      if (block.length > 1) l10n.daysOffCount(block.length),
-    ].join(' · ');
-
     switch (snapshot.state) {
-      case OffNow(:final block) when block.hasExtraOff:
-        final extra = block.days.where((d) => d.isExtraOff).length;
+      case OffNow(:final block) when block.kind == BlockKind.daysOff:
+        final vacation = _controller.vacation != null;
         return InlineCard(
-          icon: block.kind == BlockKind.daysOff
-              ? Icons.beach_access_rounded
-              : Icons.celebration_rounded,
+          icon: Icons.beach_access_rounded,
+          title: vacation ? l10n.vacationActive : l10n.kindLabel(block.kind),
+          subtitle: l10n.untilInclusive(l10n.dayMonth(block.last)),
+          onTap: () => vacation
+              ? VacationScreen.open(context, _controller)
+              : widget.onOpenTab(AppTab.calendar),
+        );
+      case OffNow(:final block, :final backToWork)
+          when block.kind == BlockKind.holiday && backToWork != null:
+        return InlineCard(
+          icon: Icons.celebration_rounded,
           tone: InlineTone.lime,
-          title: block.kind == BlockKind.longWeekend
-              ? l10n.weekendLonger(extra)
-              : l10n.blockDetails(block) ?? l10n.kindLabel(block.kind),
-          subtitle: block.kind == BlockKind.longWeekend
-              ? l10n.blockDetails(block) ?? details(block)
-              : details(block),
-          onTap: () => widget.onOpenTab(AppTab.calendar),
+          title: l10n.blockDetails(block) ?? l10n.kindLabel(block.kind),
+          subtitle: l10n.holidayMidweek(l10n.when(backToWork, now)),
         );
-      case CountingDown(:final block) when block.hasExtraOff:
-        return _aheadCard(l10n, block, details(block));
-      case CountingDown() || OffNow():
-        final next = snapshot.nextHoliday;
-        if (next == null ||
-            next.offStart!.difference(now) > const Duration(days: 30)) {
-          return null;
-        }
-        return _aheadCard(
-          l10n,
-          next,
-          '${details(next)} · '
-          '${l10n.inDuration(l10n.compactDuration(next.offStart!.difference(now)))}',
+      case OffNow(:final block) when block.kind == BlockKind.longWeekend:
+        final extra = block.days.where((d) => d.isExtraOff).toList();
+        final reason = extra.first.holidays.isNotEmpty
+            ? l10n.holidayName(extra.first.holidays.first)
+            : extra.first.override?.note;
+        return InlineCard(
+          icon: Icons.celebration_rounded,
+          tone: InlineTone.lime,
+          title: l10n.weekendLonger(extra.length),
+          subtitle: [l10n.dayMonth(extra.first.date), ?reason].join(' — '),
         );
-      case NoWorkdays() || NoDaysOff():
+      case _:
         return null;
     }
   }
-
-  Widget _aheadCard(AppLocalizations l10n, OffBlock block, String subtitle) =>
-      InlineCard(
-        icon: block.kind == BlockKind.daysOff
-            ? Icons.beach_access_rounded
-            : Icons.celebration_rounded,
-        title: switch (block.kind) {
-          BlockKind.longWeekend || BlockKind.weekend => l10n.aheadLongWeekend,
-          BlockKind.holiday => l10n.aheadHoliday,
-          BlockKind.daysOff => l10n.aheadDaysOff,
-        },
-        subtitle: subtitle,
-        onTap: () => widget.onOpenTab(AppTab.calendar),
-      );
 }
 
 /// Eyebrow, big timer and the line under it.
@@ -308,7 +308,7 @@ class _Hero extends StatelessWidget {
     );
 
     switch (state) {
-      case CountingDown(:final target, :final block) && final s:
+      case CountingDown(:final target) && final s:
         final lastHour = target.difference(now) <= const Duration(hours: 1);
         // The day the week ends on, e.g. Friday for Friday 18:00.
         final endDay = target.subtract(const Duration(minutes: 1)).weekday;
@@ -323,11 +323,7 @@ class _Hero extends StatelessWidget {
                 (l10n.weekdayName('$endDay'), true),
                 (l10n.eyebrowFreedom, false),
               ];
-        final meta = [
-          l10n.weekDone((s.progress(now) * 100).floor()),
-          if (block.kind != BlockKind.weekend)
-            l10n.kindLabel(block.kind).toLowerCase(),
-        ];
+        final meta = [l10n.weekDone((s.progress(now) * 100).floor())];
         return _layout(context, eyebrow, target, meta);
       case OffNow(:final block, backToWork: final target?):
         final eyebrow = switch (block.kind) {
@@ -344,8 +340,9 @@ class _Hero extends StatelessWidget {
             (l10n.eyebrowHolidayLeft, false),
           ],
           BlockKind.daysOff => [
-            (l10n.eyebrowDaysOffStrike, true),
-            (l10n.eyebrowDaysOffLeft, false),
+            (l10n.eyebrowVacationPrefix, false),
+            (l10n.eyebrowVacationStrike, true),
+            (l10n.eyebrowVacationSuffix, false),
           ],
         };
         final meta = [l10n.backToWorkLower];
@@ -469,17 +466,7 @@ class _OrbSection extends StatelessWidget {
       ),
       _ => (0.42, OrbMode.paused, 0),
     };
-    final inShift = switch (state) {
-      CountingDown(:final inShiftUntil?, :final target)
-          when inShiftUntil != target =>
-        inShiftUntil,
-      _ => null,
-    };
-    final caption = inShift != null
-        ? l10n.inShiftUntil(l10n.time(inShift))
-        : showTip
-        ? l10n.orbTip
-        : '';
+    final caption = showTip ? l10n.orbTip : '';
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 236),
       child: Column(

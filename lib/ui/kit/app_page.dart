@@ -15,6 +15,7 @@ class AppPage extends StatefulWidget {
     this.trailing,
     this.onRefresh,
     this.barAlways = false,
+    this.titleOnScroll = false,
     this.bottomPadding,
     this.controller,
   });
@@ -29,6 +30,9 @@ class AppPage extends StatefulWidget {
 
   /// Keep the fade behind the bar even at the top of the page.
   final bool barAlways;
+
+  /// Without a large title, show the compact one only after scrolling.
+  final bool titleOnScroll;
 
   /// Space after the content; defaults to room for the floating tab bar.
   final double? bottomPadding;
@@ -109,7 +113,8 @@ class _AppPageState extends State<AppPage> {
             top: 0,
             child: NavBar(
               title: title,
-              showTitle: _scrolled || !widget.largeTitle,
+              showTitle:
+                  _scrolled || !(widget.largeTitle || widget.titleOnScroll),
               titleIsDuplicate: widget.largeTitle,
               showFade: _scrolled || widget.barAlways,
               leading: widget.leading,

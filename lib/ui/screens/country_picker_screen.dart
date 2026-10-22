@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../l10n/labels.dart';
 import '../../models/holiday.dart';
 import '../../state/app_controller.dart';
 import '../kit/app_page.dart';
@@ -64,12 +65,18 @@ class _CountryPickerScreenState extends State<CountryPickerScreen> {
         future: _countries,
         builder: (context, snapshot) {
           final countries = snapshot.data;
-          final matches = (countries ?? const <Country>[]).where(
-            (c) =>
-                _query.isEmpty ||
-                c.name.toLowerCase().contains(_query) ||
-                c.code.toLowerCase() == _query,
-          );
+          String name(Country c) => l10n.countryLabel(c.code, c.name);
+          final matches =
+              (countries ?? const <Country>[])
+                  .where(
+                    (c) =>
+                        _query.isEmpty ||
+                        name(c).toLowerCase().contains(_query) ||
+                        c.name.toLowerCase().contains(_query) ||
+                        c.code.toLowerCase() == _query,
+                  )
+                  .toList()
+                ..sort((a, b) => name(a).compareTo(name(b)));
           return AppPage(
             title: l10n.country,
             bottomPadding: MediaQuery.paddingOf(context).bottom + 24,
@@ -138,7 +145,7 @@ class _CountryPickerScreenState extends State<CountryPickerScreen> {
                             style: const TextStyle(fontSize: 22),
                           ),
                         ),
-                        title: country.name,
+                        title: name(country),
                         subtitle: country.code,
                         selected: country.code == current,
                         onTap: () => _select(country.code),

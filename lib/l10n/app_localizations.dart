@@ -116,12 +116,6 @@ abstract class AppLocalizations {
   /// **'Calendar'**
   String get navCalendar;
 
-  /// No description provided for @navSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Settings'**
-  String get navSettings;
-
   /// No description provided for @untilWeekend.
   ///
   /// In en, this message translates to:
@@ -182,12 +176,6 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 day off} other{{count} days off}}'**
   String daysOffCount(int count);
 
-  /// No description provided for @inDuration.
-  ///
-  /// In en, this message translates to:
-  /// **'in {duration}'**
-  String inDuration(String duration);
-
   /// No description provided for @dayShort.
   ///
   /// In en, this message translates to:
@@ -235,12 +223,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'None in the next year'**
   String get noneComing;
-
-  /// No description provided for @upcomingDaysOff.
-  ///
-  /// In en, this message translates to:
-  /// **'Upcoming days off'**
-  String get upcomingDaysOff;
 
   /// No description provided for @noWorkdaysTitle.
   ///
@@ -293,26 +275,20 @@ abstract class AppLocalizations {
   /// No description provided for @legendWeekend.
   ///
   /// In en, this message translates to:
-  /// **'Weekend'**
+  /// **'weekends'**
   String get legendWeekend;
 
   /// No description provided for @legendHoliday.
   ///
   /// In en, this message translates to:
-  /// **'Holiday'**
+  /// **'holiday'**
   String get legendHoliday;
 
   /// No description provided for @legendDayOff.
   ///
   /// In en, this message translates to:
-  /// **'Your day off'**
+  /// **'vacation'**
   String get legendDayOff;
-
-  /// No description provided for @legendWorkday.
-  ///
-  /// In en, this message translates to:
-  /// **'Extra workday'**
-  String get legendWorkday;
 
   /// No description provided for @calendarHint.
   ///
@@ -398,12 +374,6 @@ abstract class AppLocalizations {
   /// **'Reset'**
   String get resetToAuto;
 
-  /// No description provided for @sectionHolidays.
-  ///
-  /// In en, this message translates to:
-  /// **'Public holidays'**
-  String get sectionHolidays;
-
   /// No description provided for @country.
   ///
   /// In en, this message translates to:
@@ -452,29 +422,11 @@ abstract class AppLocalizations {
   /// **'Couldn\'t load. Check your internet connection.'**
   String get loadFailed;
 
-  /// No description provided for @sectionWorkTime.
-  ///
-  /// In en, this message translates to:
-  /// **'Working time'**
-  String get sectionWorkTime;
-
   /// No description provided for @workdays.
   ///
   /// In en, this message translates to:
   /// **'Workdays'**
   String get workdays;
-
-  /// No description provided for @shiftStarts.
-  ///
-  /// In en, this message translates to:
-  /// **'Shift starts'**
-  String get shiftStarts;
-
-  /// No description provided for @shiftEnds.
-  ///
-  /// In en, this message translates to:
-  /// **'Shift ends'**
-  String get shiftEnds;
 
   /// No description provided for @endsNextDay.
   ///
@@ -487,12 +439,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Different hours per day'**
   String get perDayHours;
-
-  /// No description provided for @sectionWidget.
-  ///
-  /// In en, this message translates to:
-  /// **'Home screen widget'**
-  String get sectionWidget;
 
   /// No description provided for @addWidget.
   ///
@@ -517,18 +463,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Allow'**
   String get allow;
-
-  /// No description provided for @widgetHowToAndroid.
-  ///
-  /// In en, this message translates to:
-  /// **'Long-press the home screen, open Widgets and find Week Counter.'**
-  String get widgetHowToAndroid;
-
-  /// No description provided for @widgetHowToIos.
-  ///
-  /// In en, this message translates to:
-  /// **'Long-press the home screen, tap Edit › Add Widget and search for Week Counter.'**
-  String get widgetHowToIos;
 
   /// No description provided for @sectionAbout.
   ///
@@ -674,18 +608,6 @@ abstract class AppLocalizations {
   /// **'holiday'**
   String get eyebrowHolidayLeft;
 
-  /// No description provided for @eyebrowDaysOffStrike.
-  ///
-  /// In en, this message translates to:
-  /// **'work'**
-  String get eyebrowDaysOffStrike;
-
-  /// No description provided for @eyebrowDaysOffLeft.
-  ///
-  /// In en, this message translates to:
-  /// **'still off for'**
-  String get eyebrowDaysOffLeft;
-
   /// No description provided for @weekDone.
   ///
   /// In en, this message translates to:
@@ -745,24 +667,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{The weekend is 1 day longer} other{The weekend is {count} days longer}}'**
   String weekendLonger(int count);
-
-  /// No description provided for @aheadLongWeekend.
-  ///
-  /// In en, this message translates to:
-  /// **'Long weekend ahead'**
-  String get aheadLongWeekend;
-
-  /// No description provided for @aheadHoliday.
-  ///
-  /// In en, this message translates to:
-  /// **'Holiday ahead'**
-  String get aheadHoliday;
-
-  /// No description provided for @aheadDaysOff.
-  ///
-  /// In en, this message translates to:
-  /// **'Time off ahead'**
-  String get aheadDaysOff;
 
   /// No description provided for @widgetTipTitle.
   ///
@@ -893,7 +797,7 @@ abstract class AppLocalizations {
   /// No description provided for @workdaysHint.
   ///
   /// In en, this message translates to:
-  /// **'Tap a day to make it a workday or a day off'**
+  /// **'Tap a day to pick your own'**
   String get workdaysHint;
 
   /// No description provided for @shiftStartsAt.
@@ -973,6 +877,384 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Yay, time to rest'**
   String get celebrateCta;
+
+  /// No description provided for @navAwards.
+  ///
+  /// In en, this message translates to:
+  /// **'Awards'**
+  String get navAwards;
+
+  /// No description provided for @scheduleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get scheduleTitle;
+
+  /// No description provided for @weekHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get weekHeader;
+
+  /// No description provided for @weekStarts.
+  ///
+  /// In en, this message translates to:
+  /// **'Week starts'**
+  String get weekStarts;
+
+  /// No description provided for @weekEnds.
+  ///
+  /// In en, this message translates to:
+  /// **'Week ends'**
+  String get weekEnds;
+
+  /// No description provided for @holidaysShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Holidays'**
+  String get holidaysShort;
+
+  /// No description provided for @holidaysShortHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Short weeks and transfers'**
+  String get holidaysShortHint;
+
+  /// No description provided for @sectionExtras.
+  ///
+  /// In en, this message translates to:
+  /// **'Widgets and effects'**
+  String get sectionExtras;
+
+  /// No description provided for @confetti.
+  ///
+  /// In en, this message translates to:
+  /// **'Confetti'**
+  String get confetti;
+
+  /// No description provided for @confettiHint.
+  ///
+  /// In en, this message translates to:
+  /// **'With Reduce Motion on, you get a still card instead'**
+  String get confettiHint;
+
+  /// No description provided for @weeksCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 week} other{{count} weeks}}'**
+  String weeksCount(int count);
+
+  /// No description provided for @vacationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vacation'**
+  String get vacationTitle;
+
+  /// No description provided for @vacationNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get vacationNone;
+
+  /// No description provided for @vacationIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'On vacation we count the days until you\'re back. Weeks for awards are kept.'**
+  String get vacationIntro;
+
+  /// No description provided for @vacationHowLong.
+  ///
+  /// In en, this message translates to:
+  /// **'How long'**
+  String get vacationHowLong;
+
+  /// No description provided for @vacationFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting'**
+  String get vacationFrom;
+
+  /// No description provided for @vacationWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} wk'**
+  String vacationWeeks(int count);
+
+  /// No description provided for @vacationFromTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get vacationFromTomorrow;
+
+  /// No description provided for @vacationFromMonday.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get vacationFromMonday;
+
+  /// No description provided for @vacationGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Go on vacation for {days}'**
+  String vacationGo(String days);
+
+  /// No description provided for @vacationActive.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on vacation'**
+  String get vacationActive;
+
+  /// No description provided for @vacationPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Vacation planned'**
+  String get vacationPlanned;
+
+  /// No description provided for @vacationActiveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Until {date} inclusive. We count the days until you\'re back; weeks for awards are kept.'**
+  String vacationActiveBody(String date);
+
+  /// No description provided for @vacationPlannedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'From {from} to {to} inclusive. We count the days until you\'re back; weeks for awards are kept.'**
+  String vacationPlannedBody(String from, String to);
+
+  /// No description provided for @vacationEndEarly.
+  ///
+  /// In en, this message translates to:
+  /// **'Come back early'**
+  String get vacationEndEarly;
+
+  /// No description provided for @vacationCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel vacation'**
+  String get vacationCancel;
+
+  /// No description provided for @vacationNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Vacation'**
+  String get vacationNote;
+
+  /// No description provided for @untilInclusive.
+  ///
+  /// In en, this message translates to:
+  /// **'Until {date} inclusive'**
+  String untilInclusive(String date);
+
+  /// No description provided for @holidayMidweek.
+  ///
+  /// In en, this message translates to:
+  /// **'A holiday mid-week. Back to work {when}'**
+  String holidayMidweek(String when);
+
+  /// No description provided for @eyebrowVacationPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'vacation · until'**
+  String get eyebrowVacationPrefix;
+
+  /// No description provided for @eyebrowVacationStrike.
+  ///
+  /// In en, this message translates to:
+  /// **'work'**
+  String get eyebrowVacationStrike;
+
+  /// No description provided for @eyebrowVacationSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'you\'re back'**
+  String get eyebrowVacationSuffix;
+
+  /// No description provided for @onbSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onbSkip;
+
+  /// No description provided for @onbStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get onbStart;
+
+  /// No description provided for @onbNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get onbNext;
+
+  /// No description provided for @onbStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {n} of {m}'**
+  String onbStep(int n, int m);
+
+  /// No description provided for @onbWelcomePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Counting down to'**
+  String get onbWelcomePrefix;
+
+  /// No description provided for @onbWelcomeStrike.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday'**
+  String get onbWelcomeStrike;
+
+  /// No description provided for @onbWelcomeSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'freedom'**
+  String get onbWelcomeSuffix;
+
+  /// No description provided for @onbWelcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us when your work week ends. The orb fills up toward the weekend, and there\'s a small party when it arrives.'**
+  String get onbWelcomeBody;
+
+  /// No description provided for @onbTypeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you work?'**
+  String get onbTypeTitle;
+
+  /// No description provided for @onbFiveDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Five-day week'**
+  String get onbFiveDay;
+
+  /// No description provided for @onbFiveDayHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon–Fri, weekends on Saturday and Sunday'**
+  String get onbFiveDayHint;
+
+  /// No description provided for @onbCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own schedule'**
+  String get onbCustom;
+
+  /// No description provided for @onbCustomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own days, for example Tue–Sat'**
+  String get onbCustomHint;
+
+  /// No description provided for @onbTimeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When is your work week?'**
+  String get onbTimeTitle;
+
+  /// No description provided for @onbWidgetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The widget shows how much is left, even when the app is closed.'**
+  String get onbWidgetBody;
+
+  /// No description provided for @onbHowToWidget.
+  ///
+  /// In en, this message translates to:
+  /// **'How to add the widget'**
+  String get onbHowToWidget;
+
+  /// No description provided for @onbNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get onbNotNow;
+
+  /// No description provided for @awardsHero.
+  ///
+  /// In en, this message translates to:
+  /// **'times you made it\nto the weekend'**
+  String get awardsHero;
+
+  /// No description provided for @awardsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no awards yet} =1{1 award} other{{count} awards}}'**
+  String awardsCount(int count);
+
+  /// No description provided for @awardsMore.
+  ///
+  /// In en, this message translates to:
+  /// **'and {count} more'**
+  String awardsMore(int count);
+
+  /// No description provided for @awardsWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weeks'**
+  String get awardsWeekly;
+
+  /// No description provided for @awardsSpecial.
+  ///
+  /// In en, this message translates to:
+  /// **'Special'**
+  String get awardsSpecial;
+
+  /// No description provided for @awardsProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{got} of {total} earned'**
+  String awardsProgress(int got, int total);
+
+  /// No description provided for @awardLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'not earned yet'**
+  String get awardLocked;
+
+  /// No description provided for @awardEarnedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'earned {date}'**
+  String awardEarnedOn(String date);
+
+  /// No description provided for @awardWeeksLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{weeks} to go'**
+  String awardWeeksLeft(String weeks);
+
+  /// No description provided for @awardNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New award: {name}'**
+  String awardNew(String name);
+
+  /// No description provided for @celebrateWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{weeks} behind you'**
+  String celebrateWeeks(String weeks);
+
+  /// No description provided for @celebrateNext.
+  ///
+  /// In en, this message translates to:
+  /// **'{weeks} to “{name}”'**
+  String celebrateNext(String weeks, String name);
+
+  /// No description provided for @celebrateAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Every weekly award is yours'**
+  String get celebrateAllDone;
+
+  /// No description provided for @atNight.
+  ///
+  /// In en, this message translates to:
+  /// **'{day}, at night'**
+  String atNight(String day);
 
   /// No description provided for @widgetSetUp.
   ///

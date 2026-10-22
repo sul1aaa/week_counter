@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 
 import '../core/calendar_date.dart';
+import '../domain/awards.dart';
 import '../domain/countdown_engine.dart';
 import '../domain/day_classifier.dart';
 import '../domain/widget_payload.dart';
@@ -54,6 +55,7 @@ class AppController extends ChangeNotifier {
   int _holidayRequest = 0;
   late CountdownEngine _engine;
   late CountdownSnapshot _snapshot;
+  String? _freshAward;
 
   AppSettings get settings => _settings;
   HolidayCalendar get holidays => _holidays;
@@ -97,6 +99,65 @@ class AppController extends ChangeNotifier {
   Future<void> markCelebrated(OffBlock block) =>
       _updatePrefs(_prefs.copyWith(celebratedUntil: block.offStart ?? clock()));
 
+  /// The award earned when the latest time off started, once.
+  String? takeFreshAward() {
+    final id = _freshAward;
+    _freshAward = null;
+    return id;
+  }
+
+  /// Gives the award [id] if it isn't earned yet. True if it is new.
+  bool earn(String id) {
+    if (_prefs.earned.containsKey(id)) return false;
+    unawaited(
+      _updatePrefs(_prefs.copyWith(earned: {..._prefs.earned, id: clock()})),
+    );
+    return true;
+  }
+
+  Future<void> completeOnboarding() =>
+      _updatePrefs(_prefs.copyWith(onboarded: true));
+
+  Future<void> setConfetti(bool on) =>
+      _updatePrefs(_prefs.copyWith(confetti: on));
+
+  /// The vacation that is on now or comes next.
+  ({CalendarDate first, CalendarDate last})? get vacation {
+    final today = CalendarDate.fromDateTime(clock());
+    final dates = [
+      for (final e in _settings.overrides.entries)
+        if (e.value.vacation) e.key,
+    ]..sort();
+    for (var i = 0; i < dates.length; i++) {
+      final first = dates[i];
+      var last = first;
+      while (i + 1 < dates.length && dates[i + 1] == last.addDays(1)) {
+        last = dates[++i];
+      }
+      if (last >= today) return (first: first, last: last);
+    }
+    return null;
+  }
+
+  /// Marks [days] days from [first] as vacation.
+  Future<void> planVacation(CalendarDate first, int days, String note) {
+    earn('vacation');
+    return setOverride([
+      for (var i = 0; i < days; i++) first.addDays(i),
+    ], DayOverride(OverrideKind.dayOff, note: note, vacation: true));
+  }
+
+  /// Cancels the coming vacation, or ends the current one today.
+  Future<void> cancelVacation() {
+    final range = vacation;
+    if (range == null) return Future.value();
+    final today = CalendarDate.fromDateTime(clock());
+    final from = range.first < today ? today : range.first;
+    return setOverride([
+      for (var d = from; d <= range.last; d = d.addDays(1)) d,
+    ], null);
+  }
+
   Future<void> dismissWidgetTip() =>
       _updatePrefs(_prefs.copyWith(widgetTipDone: true));
 
@@ -128,8 +189,15 @@ class AppController extends ChangeNotifier {
       _settings = saved;
     }
     final prefs = await _prefsRepository.load();
-    // Don't greet a new user with a party for a weekend already underway.
-    _prefs = prefs ?? UiPrefs(celebratedUntil: clock());
+    // Don't greet a new user with a party for a weekend already underway,
+    // and count weekends from now on.
+    _prefs =
+        prefs ??
+        UiPrefs(
+          onboarded: saved != null,
+          celebratedUntil: clock(),
+          countedUntil: clock(),
+        );
     if (prefs == null) await _prefsRepository.save(_prefs);
     _countries = await _holidayRepository.cachedCountries();
     final code = _settings.countryCode;
@@ -142,6 +210,7 @@ class AppController extends ChangeNotifier {
       );
     }
     _rebuild();
+    _countTimeOff();
     unawaited(refreshHolidays());
     if (_countries == null) unawaited(_loadCountriesQuietly());
   }
@@ -194,6 +263,7 @@ class AppController extends ChangeNotifier {
             network: false,
           );
     _rebuild();
+    _acceptChange();
     await _settingsRepository.save(_settings);
     if (code != null) unawaited(refreshHolidays());
   }
@@ -217,11 +287,13 @@ class AppController extends ChangeNotifier {
   /// Recomputes the countdown, e.g. when a shift ends or the day changes.
   void recompute() {
     _snapshot = _engine.snapshot(clock());
+    _countTimeOff();
     notifyListeners();
   }
 
   Future<void> onResume() async {
     _rebuild();
+    _countTimeOff();
     await refreshHolidays();
   }
 
@@ -232,7 +304,62 @@ class AppController extends ChangeNotifier {
   Future<void> _update(AppSettings settings) async {
     _settings = settings;
     _rebuild();
+    _acceptChange();
     await _settingsRepository.save(settings);
+  }
+
+  /// After the user edits the schedule, time off that "started" only
+  /// because of the edit is neither counted nor celebrated.
+  void _acceptChange() {
+    final state = _snapshot.state;
+    final start = state is OffNow ? state.block.offStart : null;
+    final celebrated = _prefs.celebratedUntil;
+    _prefs = _prefs.copyWith(
+      countedUntil: clock(),
+      celebratedUntil:
+          start != null && (celebrated == null || start.isAfter(celebrated))
+          ? start
+          : null,
+    );
+    unawaited(_prefsRepository.save(_prefs));
+  }
+
+  /// Counts time off that started since the last look, and hands out
+  /// weekly and special awards for it.
+  void _countTimeOff() {
+    final now = clock();
+    final from = _prefs.countedUntil;
+    if (from != null && !now.isAfter(from)) return;
+    final starts = from == null
+        ? const <({DateTime start, CalendarDate lastWorkday})>[]
+        : _engine.timeOffStarts(from, now);
+    var weeks = _prefs.weeks;
+    final earned = {..._prefs.earned};
+    void give(String id, DateTime at) {
+      if (earned.containsKey(id)) return;
+      earned[id] = at;
+      _freshAward = id;
+    }
+
+    for (final (:start, :lastWorkday) in starts) {
+      weeks++;
+      for (final award in awards) {
+        if (award.weeks == weeks) give(award.id, start);
+      }
+      if (start.weekday == DateTime.friday && start.day == 13) {
+        give('friday13', start);
+      }
+      final firstOff = classify(lastWorkday.addDays(1));
+      if (firstOff.isScheduledWorkday &&
+          firstOff.reasons.contains(OffReason.publicHoliday)) {
+        give('shortWeek', start);
+      }
+      if (_settings.schedule.shiftFor(lastWorkday.weekday).isOvernight) {
+        give('nightShift', start);
+      }
+    }
+    _prefs = _prefs.copyWith(countedUntil: now, weeks: weeks, earned: earned);
+    unawaited(_prefsRepository.save(_prefs));
   }
 
   void _rebuild() {

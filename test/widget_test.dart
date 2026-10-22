@@ -22,7 +22,7 @@ void main() {
 
   setUp(() => now = DateTime(2026, 10, 21, 12));
 
-  Future<AppController> createController() async {
+  Future<AppController> createController({bool onboarded = true}) async {
     final store = InMemoryLocalStore();
     widgetSync = NoopWidgetSync();
     final controller = AppController(
@@ -37,6 +37,7 @@ void main() {
       deviceLocale: () => const Locale('ru', 'RU'),
     );
     await controller.init();
+    if (onboarded) await controller.completeOnboarding();
     return controller;
   }
 
@@ -62,23 +63,29 @@ void main() {
 
     // The country was guessed from the phone's region.
     expect(controller.settings.countryCode, 'RU');
+    expect(find.text('Wed, October 21'), findsOneWidget);
     expect(find.text('until'), findsOneWidget);
     expect(find.text('Friday'), findsOneWidget);
     expect(find.text('freedom'), findsOneWidget);
     expect(find.textContaining('of the week done'), findsOneWidget);
-    expect(find.text('In shift until 18:00'), findsOneWidget);
-    expect(find.text('Holiday ahead'), findsOneWidget);
-    expect(find.textContaining('Unity Day'), findsOneWidget);
+    expect(find.text('tap the orb for a new line'), findsOneWidget);
     await tester.scrollUntilVisible(find.byType(JokeCarousel), 200);
     expect(find.byType(JokeCarousel), findsOneWidget);
 
     await openTab(tester, 'calendar');
     expect(find.text('October'), findsOneWidget);
     expect(find.text('Days off in October'), findsOneWidget);
-
-    await openTab(tester, 'settings');
-    expect(find.text('Working time'), findsOneWidget);
     expect(find.text('Russia'), findsOneWidget);
+
+    await openTab(tester, 'awards');
+    expect(find.text('First Friday'), findsOneWidget);
+    expect(find.text('no awards yet'), findsOneWidget);
+
+    await openTab(tester, 'countdown');
+    await tester.tap(find.byTooltip('Schedule'));
+    await tester.pumpAndSettle();
+    expect(find.text('Week starts'), findsOneWidget);
+    expect(find.text('Vacation'), findsOneWidget);
   });
 
   testWidgets('renders in Russian and feeds the widget', (tester) async {
@@ -89,10 +96,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(find.text('Ср, 21 октября'), findsOneWidget);
     expect(find.text('до'), findsOneWidget);
     expect(find.text('пятницы'), findsOneWidget);
     expect(find.text('свободы'), findsOneWidget);
-    expect(find.text('Впереди праздник'), findsOneWidget);
 
     final payload = widgetSync.lastPayload!;
     expect(payload.locale, 'ru');
@@ -113,7 +120,30 @@ void main() {
     expect(find.text('No workdays set'), findsOneWidget);
     await tester.tap(find.text('Open settings'));
     await tester.pumpAndSettle();
-    expect(find.text('Working time'), findsOneWidget);
+    expect(find.text('Week starts'), findsOneWidget);
+  });
+
+  testWidgets('first launch walks through onboarding', (tester) async {
+    reduceMotion(tester);
+    final controller = await createController(onboarded: false);
+    await tester.pumpWidget(
+      WeekCounterApp(controller: controller, locale: const Locale('en')),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Get started'));
+    await tester.pumpAndSettle();
+    expect(find.text('How do you work?'), findsOneWidget);
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+    expect(find.text('When is your work week?'), findsOneWidget);
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Not now'));
+    await tester.pumpAndSettle();
+
+    expect(controller.prefs.onboarded, isTrue);
+    expect(find.text('freedom'), findsOneWidget);
   });
 
   testWidgets('celebrates once when the weekend starts', (tester) async {
@@ -130,6 +160,9 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
     expect(find.text('Yay, time to rest'), findsOneWidget);
+    // The first weekend earns the first award.
+    expect(controller.prefs.weeks, 1);
+    expect(find.text('New award: First Friday'), findsOneWidget);
 
     await tester.tap(find.text('Yay, time to rest'));
     await tester.pumpAndSettle();

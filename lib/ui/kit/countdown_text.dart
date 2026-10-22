@@ -65,9 +65,10 @@ class CountdownText extends StatelessWidget {
         final last = i == chars.length - 1;
         children.add(
           Padding(
+            // CSS margins in em of the unit's own size, as in the prototype.
             padding: EdgeInsets.only(
-              left: 0.06 * fontSize,
-              right: last ? 0 : 0.32 * fontSize,
+              left: 0.06 * 0.36 * fontSize,
+              right: last ? 0 : 0.32 * 0.36 * fontSize,
             ),
             child: Text(c, style: unitStyle),
           ),

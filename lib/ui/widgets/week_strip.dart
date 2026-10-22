@@ -100,10 +100,12 @@ class _DayCell extends StatelessWidget {
       number = t.ink2;
     } else if (day.isOff) {
       background = today && offNow ? Tokens.lime : t.limeSoft;
-      number = today && offNow ? const Color(0xFF111111) : t.limeInk;
+      number = t.limeInk;
     } else if (done) {
       number = Colors.white;
     }
+    // Today's number always sits on a small chip.
+    if (today) number = t.ink;
 
     final status = day.isWork
         ? (today
@@ -181,13 +183,13 @@ class _DayCell extends StatelessWidget {
                       ),
                     Center(
                       child: Container(
-                        padding: today && day.isWork && !done
+                        padding: today
                             ? const EdgeInsets.symmetric(
                                 horizontal: 6,
                                 vertical: 3,
                               )
                             : EdgeInsets.zero,
-                        decoration: today && day.isWork && !done
+                        decoration: today
                             ? BoxDecoration(
                                 color: t.surface,
                                 borderRadius: BorderRadius.circular(9),

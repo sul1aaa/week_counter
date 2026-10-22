@@ -159,3 +159,38 @@ class IconTile extends StatelessWidget {
     );
   }
 }
+
+/// The main action pinned to the bottom of a screen, over a fade.
+class BottomAction extends StatelessWidget {
+  const BottomAction({super.key, required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [t.bg.withAlpha(0), t.bg, t.bg],
+          stops: const [0, 0.28, 1],
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          16,
+          16,
+          16,
+          MediaQuery.paddingOf(context).bottom + 8,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 4,
+          children: children,
+        ),
+      ),
+    );
+  }
+}

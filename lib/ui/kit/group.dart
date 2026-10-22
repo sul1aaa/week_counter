@@ -63,6 +63,7 @@ class GroupRow extends StatelessWidget {
     this.onTap,
     this.chevron = true,
     this.selected = false,
+    this.monoValue = false,
   });
 
   final String title;
@@ -78,6 +79,9 @@ class GroupRow extends StatelessWidget {
 
   /// Shows a check mark, for single-choice lists.
   final bool selected;
+
+  /// Sets [value] in the small monospace face, for dates.
+  final bool monoValue;
 
   @override
   Widget build(BuildContext context) {
@@ -106,13 +110,15 @@ class GroupRow extends StatelessWidget {
             ),
             if (value != null) ...[
               const SizedBox(width: 12),
-              Flexible(
+              // Short values sit right next to the chevron.
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 200),
                 child: Text(
                   value!,
                   textAlign: TextAlign.end,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: t.body.copyWith(color: t.ink2),
+                  style: monoValue ? t.mono : t.body.copyWith(color: t.ink2),
                 ),
               ),
             ],

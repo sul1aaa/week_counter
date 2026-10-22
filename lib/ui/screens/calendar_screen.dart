@@ -83,10 +83,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
       builder: (context, _) {
         final now = _controller.clock();
         final today = CalendarDate.fromDateTime(now);
-        final snapshot = _controller.snapshot;
         final first = firstWeekday(context);
         final selected = _selectedDates.toSet();
-        final upcoming = snapshot.upcoming.take(10).toList();
         final holidays = _controller.upcomingHolidays();
         final code = _controller.settings.countryCode;
 
@@ -95,15 +93,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
             AppPage(
               title: l10n.navCalendar,
               controller: _scroll,
-              trailing: GlassButton(
-                icon: Icons.today_rounded,
-                label: l10n.today,
-                onTap: () => _scroll.animateTo(
-                  0,
-                  duration: Motion.slow,
-                  curve: Motion.ios,
-                ),
-              ),
               onRefresh: () => _controller.refreshHolidays(force: true),
               bottomPadding: bottom + (selected.isEmpty ? 104 : 260),
               children: [
@@ -114,19 +103,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 Group(
                   children: [
                     GroupRow(
-                      icon: Icons.celebration_rounded,
-                      title: l10n.sectionHolidays,
-                      value: _controller.countryName(code) ?? l10n.noCountry,
+                      title: l10n.holidaysShort,
+                      value: code == null
+                          ? l10n.noCountry
+                          : l10n.countryLabel(
+                              code,
+                              _controller.countryName(code),
+                            ),
                       onTap: () =>
                           CountryPickerScreen.open(context, _controller),
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 8, 32, 0),
-                  child: Text(l10n.calendarHint, style: t.footnote),
-                ),
-                for (var i = 0; i < 12; i++)
+                for (var i = 0; i < 6; i++)
                   _MonthGrid(
                     month: DateTime(today.year, today.month + i),
                     today: today,
@@ -136,29 +125,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     onTap: _onTap,
                     onLongPress: _onLongPress,
                   ),
-                if (upcoming.isNotEmpty) ...[
-                  SectionTitle(l10n.upcomingDaysOff),
-                  Group(
-                    children: [
-                      for (final block in upcoming)
-                        GroupRow(
-                          icon: blockIcon(block.kind),
-                          title:
-                              l10n.blockDetails(block) ??
-                              l10n.kindLabel(block.kind),
-                          subtitle:
-                              '${l10n.dateRange(block.first, block.last)} · '
-                              '${l10n.daysOffCount(block.length)}',
-                          value: l10n.inDuration(
-                            l10n.compactDuration(
-                              block.offStart!.difference(now),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
-                SectionTitle(l10n.upcomingHolidays),
+                GroupHeader(l10n.upcomingHolidays),
                 Group(
                   children: [
                     if (code == null || holidays.isEmpty)
@@ -174,7 +141,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     for (final holiday in holidays)
                       GroupRow(
                         title: l10n.holidayName(holiday),
-                        value: l10n.date(holiday.date),
+                        value: l10n.dayMonth(holiday.date),
+                        monoValue: true,
+                        chevron: false,
                         onTap: () => showDayDetailSheet(
                           context,
                           _controller,
@@ -182,6 +151,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         ),
                       ),
                   ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 12, 32, 0),
+                  child: Text(l10n.calendarHint, style: t.footnote),
                 ),
               ],
             ),
@@ -204,13 +177,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 }
-
-IconData blockIcon(BlockKind kind) => switch (kind) {
-  BlockKind.weekend => Icons.weekend_rounded,
-  BlockKind.longWeekend => Icons.wb_sunny_rounded,
-  BlockKind.holiday => Icons.celebration_rounded,
-  BlockKind.daysOff => Icons.beach_access_rounded,
-};
 
 /// Two cards: time to the next change, and days off this month.
 class _Summary extends StatelessWidget {
@@ -262,11 +228,7 @@ class _Summary extends StatelessWidget {
                 value: '$daysOff',
                 detail: nextHoliday == null
                     ? l10n.noHolidaysShort
-                    : l10n.holidayOn(
-                        DateFormat.MMMd(
-                          l10n.localeName,
-                        ).format(nextHoliday.date.startOfDay),
-                      ),
+                    : l10n.holidayOn(l10n.dayMonth(nextHoliday.date)),
               ),
             ),
           ],
@@ -381,17 +343,6 @@ class _Legend extends StatelessWidget {
             square(
               color: t.surface,
               child: CustomPaint(painter: StripesPainter(t.surface3, gap: 3)),
-            ),
-          ),
-          item(
-            l10n.legendWorkday,
-            Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: t.ink2, width: 1.5),
-              ),
             ),
           ),
         ],

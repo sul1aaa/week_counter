@@ -9,19 +9,24 @@ enum OverrideKind { dayOff, workday }
 /// weekend/holiday classification.
 @immutable
 class DayOverride {
-  const DayOverride(this.kind, {this.note});
+  const DayOverride(this.kind, {this.note, this.vacation = false});
 
   factory DayOverride.fromJson(Map<String, dynamic> json) => DayOverride(
     OverrideKind.values.byName(json['kind'] as String),
     note: json['note'] as String?,
+    vacation: json['vacation'] as bool? ?? false,
   );
 
   final OverrideKind kind;
   final String? note;
 
+  /// Part of a vacation planned on the Vacation screen.
+  final bool vacation;
+
   Map<String, dynamic> toJson() => {
     'kind': kind.name,
     if (note != null && note!.isNotEmpty) 'note': note,
+    if (vacation) 'vacation': true,
   };
 }
 

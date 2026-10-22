@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../domain/awards.dart';
 import '../l10n/app_localizations.dart';
 import '../state/app_controller.dart';
 import 'kit/glass.dart';
 import 'kit/pressable.dart';
+import 'screens/awards_screen.dart';
 import 'screens/calendar_screen.dart';
 import 'screens/celebrate_screen.dart';
 import 'screens/home_screen.dart';
-import 'screens/settings_screen.dart';
+import 'screens/onboarding_screen.dart';
 import 'theme/tokens.dart';
 
-enum AppTab { countdown, calendar, settings }
+enum AppTab { countdown, calendar, awards }
 
 class RootShell extends StatefulWidget {
   const RootShell({super.key, required this.controller});
@@ -31,28 +33,53 @@ class _RootShellState extends State<RootShell> {
   @override
   void initState() {
     super.initState();
-    _controller.addListener(_maybeCelebrate);
+    _controller.addListener(_onChange);
     WidgetsBinding.instance.addPostFrameCallback((_) => _maybeCelebrate());
   }
 
   @override
   void dispose() {
-    _controller.removeListener(_maybeCelebrate);
+    _controller.removeListener(_onChange);
     super.dispose();
   }
 
   void _open(AppTab tab) => setState(() => _tab = tab);
 
+  void _onChange() {
+    // Onboarding ends by changing prefs, which swaps in the tabs.
+    if (_shownOnboarded != _controller.prefs.onboarded) setState(() {});
+    _maybeCelebrate();
+  }
+
+  /// Whether the last build showed the tabs rather than onboarding.
+  bool _shownOnboarded = true;
+
   /// Throws the party once each time off starts, whichever tab is open.
   Future<void> _maybeCelebrate() async {
     final block = _controller.celebrationDue;
-    if (block == null || _celebrating || !mounted) return;
+    if (block == null ||
+        _celebrating ||
+        !mounted ||
+        !_controller.prefs.onboarded) {
+      return;
+    }
     _celebrating = true;
     await _controller.markCelebrated(block);
     if (!mounted) return;
-    await CelebrateScreen.open(context, _controller, block);
+    final award = await CelebrateScreen.open(
+      context,
+      _controller,
+      block,
+      award: _controller.takeFreshAward(),
+    );
     _celebrating = false;
-    if (mounted) _open(AppTab.countdown);
+    if (!mounted) return;
+    if (award == null) {
+      _open(AppTab.countdown);
+    } else {
+      _open(AppTab.awards);
+      await showAwardSheet(context, _controller, awardById(award));
+    }
   }
 
   @override
@@ -60,10 +87,19 @@ class _RootShellState extends State<RootShell> {
     final l10n = AppLocalizations.of(context);
     final t = context.tokens;
     final bottom = MediaQuery.paddingOf(context).bottom;
+    _shownOnboarded = _controller.prefs.onboarded;
+    if (!_shownOnboarded) {
+      return AnnotatedRegion<SystemUiOverlayStyle>(
+        value: t.isDark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
+        child: OnboardingFlow(controller: _controller),
+      );
+    }
     final screens = [
       HomeScreen(controller: _controller, onOpenTab: _open),
       CalendarScreen(controller: _controller),
-      SettingsScreen(controller: _controller),
+      AwardsScreen(controller: _controller),
     ];
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: t.isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
@@ -108,7 +144,7 @@ class _RootShellState extends State<RootShell> {
                   items: [
                     (Icons.timer_rounded, l10n.navCountdown),
                     (Icons.calendar_month_rounded, l10n.navCalendar),
-                    (Icons.tune_rounded, l10n.navSettings),
+                    (Icons.emoji_events_rounded, l10n.navAwards),
                   ],
                 ),
               ),

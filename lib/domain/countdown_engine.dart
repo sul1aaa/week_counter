@@ -70,7 +70,9 @@ class OffBlock {
     );
     final short = length <= 4;
     if (hasCustom) {
-      return hasScheduledOff && short ? BlockKind.longWeekend : BlockKind.daysOff;
+      return hasScheduledOff && short
+          ? BlockKind.longWeekend
+          : BlockKind.daysOff;
     }
     return hasScheduledOff && short ? BlockKind.longWeekend : BlockKind.holiday;
   }
@@ -240,6 +242,26 @@ class CountdownEngine {
       date = previous;
     }
     return null;
+  }
+
+  /// Each time off that started after [from] and by [to], oldest first,
+  /// with the last workday before it. Looks at most a year back.
+  List<({DateTime start, CalendarDate lastWorkday})> timeOffStarts(
+    DateTime from,
+    DateTime to,
+  ) {
+    final result = <({DateTime start, CalendarDate lastWorkday})>[];
+    final last = CalendarDate.fromDateTime(to);
+    var date = CalendarDate.fromDateTime(from).addDays(-1);
+    if (date.daysUntil(last) > 400) date = last.addDays(-400);
+    for (; date <= last; date = date.addDays(1)) {
+      if (_day(date).isOff || _day(date.addDays(1)).isWork) continue;
+      final start = schedule.shiftEndOn(date);
+      if (start.isAfter(from) && !start.isAfter(to)) {
+        result.add((start: start, lastWorkday: date));
+      }
+    }
+    return result;
   }
 
   /// End of the shift in progress at [now], or null between shifts.

@@ -18,9 +18,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get navCalendar => 'Календарь';
 
   @override
-  String get navSettings => 'Настройки';
-
-  @override
   String get untilWeekend => 'До выходных';
 
   @override
@@ -65,11 +62,6 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String inDuration(String duration) {
-    return 'через $duration';
-  }
-
-  @override
   String get dayShort => 'д';
 
   @override
@@ -92,9 +84,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get noneComing => 'Не будет в ближайший год';
-
-  @override
-  String get upcomingDaysOff => 'Предстоящие выходные';
 
   @override
   String get noWorkdaysTitle => 'Рабочие дни не выбраны';
@@ -125,16 +114,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get retry => 'Повторить';
 
   @override
-  String get legendWeekend => 'Выходной';
+  String get legendWeekend => 'выходные';
 
   @override
-  String get legendHoliday => 'Праздник';
+  String get legendHoliday => 'праздник';
 
   @override
-  String get legendDayOff => 'Ваш выходной';
-
-  @override
-  String get legendWorkday => 'Рабочий (перенос)';
+  String get legendDayOff => 'отпуск';
 
   @override
   String get calendarHint =>
@@ -190,9 +176,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get resetToAuto => 'Сбросить';
 
   @override
-  String get sectionHolidays => 'Государственные праздники';
-
-  @override
   String get country => 'Страна';
 
   @override
@@ -220,25 +203,13 @@ class AppLocalizationsRu extends AppLocalizations {
       'Не удалось загрузить. Проверьте подключение к интернету.';
 
   @override
-  String get sectionWorkTime => 'Рабочее время';
-
-  @override
   String get workdays => 'Рабочие дни';
-
-  @override
-  String get shiftStarts => 'Начало смены';
-
-  @override
-  String get shiftEnds => 'Конец смены';
 
   @override
   String get endsNextDay => 'Заканчивается на следующий день';
 
   @override
   String get perDayHours => 'Разное время по дням';
-
-  @override
-  String get sectionWidget => 'Виджет на экране «Домой»';
 
   @override
   String get addWidget => 'Добавить виджет на экран';
@@ -252,14 +223,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get allow => 'Разрешить';
-
-  @override
-  String get widgetHowToAndroid =>
-      'Удерживайте палец на главном экране, откройте «Виджеты» и найдите «Счётчик выходных».';
-
-  @override
-  String get widgetHowToIos =>
-      'Удерживайте палец на экране «Домой», нажмите «Править» › «Добавить виджет» и найдите «Счётчик выходных».';
 
   @override
   String get sectionAbout => 'О приложении';
@@ -397,12 +360,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get eyebrowHolidayLeft => 'праздник';
 
   @override
-  String get eyebrowDaysOffStrike => 'работа';
-
-  @override
-  String get eyebrowDaysOffLeft => 'отдыхаем ещё';
-
-  @override
   String weekDone(int percent) {
     return '$percent% недели позади';
   }
@@ -445,15 +402,6 @@ class AppLocalizationsRu extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get aheadLongWeekend => 'Впереди длинные выходные';
-
-  @override
-  String get aheadHoliday => 'Впереди праздник';
-
-  @override
-  String get aheadDaysOff => 'Впереди отдых';
 
   @override
   String get widgetTipTitle => 'Таймер на главном экране';
@@ -528,8 +476,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Сохраняем сразу. Таймер и виджет пересчитаются сами.';
 
   @override
-  String get workdaysHint =>
-      'Нажмите на день, чтобы сделать его рабочим или выходным';
+  String get workdaysHint => 'Нажмите на день, чтобы выбрать свои';
 
   @override
   String get shiftStartsAt => 'Начало';
@@ -573,6 +520,250 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get celebrateCta => 'Ура, отдыхаю';
+
+  @override
+  String get navAwards => 'Награды';
+
+  @override
+  String get scheduleTitle => 'График';
+
+  @override
+  String get weekHeader => 'Неделя';
+
+  @override
+  String get weekStarts => 'Начало недели';
+
+  @override
+  String get weekEnds => 'Конец недели';
+
+  @override
+  String get holidaysShort => 'Праздники';
+
+  @override
+  String get holidaysShortHint => 'Короткие недели и переносы';
+
+  @override
+  String get sectionExtras => 'Виджеты и эффекты';
+
+  @override
+  String get confetti => 'Конфетти';
+
+  @override
+  String get confettiHint =>
+      'Если в iPhone включено «Уменьшение движения», покажем открытку без анимации';
+
+  @override
+  String weeksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count недели',
+      many: '$count недель',
+      few: '$count недели',
+      one: '$count неделя',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get vacationTitle => 'Отпуск';
+
+  @override
+  String get vacationNone => 'Нет';
+
+  @override
+  String get vacationIntro =>
+      'В отпуске считаем дни до возвращения. Недели для наград сохранятся.';
+
+  @override
+  String get vacationHowLong => 'Сколько';
+
+  @override
+  String get vacationFrom => 'С какого дня';
+
+  @override
+  String vacationWeeks(int count) {
+    return '$count нед';
+  }
+
+  @override
+  String get vacationFromTomorrow => 'С завтра';
+
+  @override
+  String get vacationFromMonday => 'С понедельника';
+
+  @override
+  String vacationGo(String days) {
+    return 'Уйти в отпуск на $days';
+  }
+
+  @override
+  String get vacationActive => 'Вы в отпуске';
+
+  @override
+  String get vacationPlanned => 'Отпуск запланирован';
+
+  @override
+  String vacationActiveBody(String date) {
+    return 'До $date включительно. Считаем дни до возвращения, недели для наград сохранятся.';
+  }
+
+  @override
+  String vacationPlannedBody(String from, String to) {
+    return 'С $from по $to включительно. Считаем дни до возвращения, недели для наград сохранятся.';
+  }
+
+  @override
+  String get vacationEndEarly => 'Вернуться раньше';
+
+  @override
+  String get vacationCancel => 'Отменить отпуск';
+
+  @override
+  String get vacationNote => 'Отпуск';
+
+  @override
+  String untilInclusive(String date) {
+    return 'До $date включительно';
+  }
+
+  @override
+  String holidayMidweek(String when) {
+    return 'Праздник посреди недели. Работа $when';
+  }
+
+  @override
+  String get eyebrowVacationPrefix => 'отпуск · до';
+
+  @override
+  String get eyebrowVacationStrike => 'работы';
+
+  @override
+  String get eyebrowVacationSuffix => 'возвращения';
+
+  @override
+  String get onbSkip => 'Пропустить';
+
+  @override
+  String get onbStart => 'Начать';
+
+  @override
+  String get onbNext => 'Дальше';
+
+  @override
+  String onbStep(int n, int m) {
+    return 'Шаг $n из $m';
+  }
+
+  @override
+  String get onbWelcomePrefix => 'Считаем до';
+
+  @override
+  String get onbWelcomeStrike => 'пятницы';
+
+  @override
+  String get onbWelcomeSuffix => 'свободы';
+
+  @override
+  String get onbWelcomeBody =>
+      'Скажите, когда заканчивается ваша рабочая неделя. Шар будет заполняться к выходным, а когда они начнутся, будет маленький праздник.';
+
+  @override
+  String get onbTypeTitle => 'Как вы работаете?';
+
+  @override
+  String get onbFiveDay => 'Пятидневка';
+
+  @override
+  String get onbFiveDayHint => 'Пн–Пт, выходные в субботу и воскресенье';
+
+  @override
+  String get onbCustom => 'Свой график';
+
+  @override
+  String get onbCustomHint => 'Свои дни, например вт–сб';
+
+  @override
+  String get onbTimeTitle => 'Когда ваша рабочая неделя?';
+
+  @override
+  String get onbWidgetBody =>
+      'Виджет покажет, сколько осталось, даже если приложение закрыто.';
+
+  @override
+  String get onbHowToWidget => 'Как добавить виджет';
+
+  @override
+  String get onbNotNow => 'Не сейчас';
+
+  @override
+  String get awardsHero => 'раз дождались\nвыходных';
+
+  @override
+  String awardsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count награды',
+      many: '$count наград',
+      few: '$count награды',
+      one: '$count награда',
+      zero: 'наград пока нет',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String awardsMore(int count) {
+    return 'и ещё $count';
+  }
+
+  @override
+  String get awardsWeekly => 'Недели';
+
+  @override
+  String get awardsSpecial => 'Особые';
+
+  @override
+  String awardsProgress(int got, int total) {
+    return '$got из $total получено';
+  }
+
+  @override
+  String get awardLocked => 'ещё не получена';
+
+  @override
+  String awardEarnedOn(String date) {
+    return 'получена $date';
+  }
+
+  @override
+  String awardWeeksLeft(String weeks) {
+    return 'ещё $weeks';
+  }
+
+  @override
+  String awardNew(String name) {
+    return 'Новая награда: $name';
+  }
+
+  @override
+  String celebrateWeeks(String weeks) {
+    return '$weeks позади';
+  }
+
+  @override
+  String celebrateNext(String weeks, String name) {
+    return 'До «$name» ещё $weeks';
+  }
+
+  @override
+  String get celebrateAllDone => 'Все награды за недели собраны';
+
+  @override
+  String atNight(String day) {
+    return '$day, ночью';
+  }
 
   @override
   String get widgetSetUp => 'Откройте приложение для настройки';
