@@ -68,6 +68,44 @@ extension Labels on AppLocalizations {
     return '$day ${this.time(time)}';
   }
 
+  /// "today, 18:00", "tomorrow, 09:00", "Friday, 18:00" within the coming
+  /// week of [from], "Oct 30, 18:00" after.
+  String when(DateTime time, DateTime from) {
+    final days = CalendarDate.fromDateTime(
+      from,
+    ).daysUntil(CalendarDate.fromDateTime(time));
+    final day = switch (days) {
+      0 => whenToday,
+      1 => whenTomorrow,
+      > 1 && < 7 => DateFormat.EEEE(localeName).format(time),
+      _ => DateFormat.MMMd(localeName).format(time),
+    };
+    return whenAt(day, this.time(time));
+  }
+
+  /// Upper-case weekday initials for the week strip and month grid: "MON".
+  String weekdayCaps(int weekday) => weekdayShort(weekday).toUpperCase();
+
+  /// "2 days 4 hours", "3 hours 20 min", "47 min" or "12 seconds".
+  String humanDuration(Duration duration) {
+    final d = duration.isNegative ? Duration.zero : duration;
+    final days = d.inDays;
+    final hours = d.inHours % 24;
+    final minutes = d.inMinutes % 60;
+    if (days > 0) {
+      return hours == 0
+          ? durationDays(days)
+          : '${durationDays(days)} ${durationHours(hours)}';
+    }
+    if (hours > 0) {
+      return minutes == 0
+          ? durationHours(hours)
+          : '${durationHours(hours)} ${durationMinutes(minutes)}';
+    }
+    if (minutes > 0) return durationMinutes(minutes);
+    return durationSeconds(d.inSeconds);
+  }
+
   /// "2d 3h", "3h 20m" or "20m".
   String compactDuration(Duration duration) {
     final d = duration.isNegative ? Duration.zero : duration;

@@ -12,6 +12,8 @@ import '../models/app_settings.dart';
 import '../models/holiday.dart';
 import '../models/work_schedule.dart';
 import '../services/holiday_repository.dart';
+import '../services/local_store.dart';
+import '../services/prefs_repository.dart';
 import '../services/settings_repository.dart';
 import '../services/widget_sync.dart';
 
@@ -24,19 +26,28 @@ class AppController extends ChangeNotifier {
     required SettingsRepository settingsRepository,
     required HolidayRepository holidayRepository,
     required this.widgetSync,
+    PrefsRepository? prefsRepository,
     this.clock = DateTime.now,
     Locale Function()? deviceLocale,
   }) : _settingsRepository = settingsRepository,
        _holidayRepository = holidayRepository,
-       _deviceLocale = deviceLocale ?? (() => PlatformDispatcher.instance.locale);
+       _prefsRepository =
+           prefsRepository ?? PrefsRepository(InMemoryLocalStore()),
+       _deviceLocale =
+           deviceLocale ?? (() => PlatformDispatcher.instance.locale);
+
+  /// How long after time off starts it is still worth celebrating.
+  static const celebrateWithin = Duration(days: 2);
 
   final SettingsRepository _settingsRepository;
   final HolidayRepository _holidayRepository;
+  final PrefsRepository _prefsRepository;
   final WidgetSync widgetSync;
   final Clock clock;
   final Locale Function() _deviceLocale;
 
   AppSettings _settings = const AppSettings();
+  UiPrefs _prefs = const UiPrefs();
   HolidayCalendar _holidays = HolidayCalendar.empty;
   List<Country>? _countries;
   bool _loadingHolidays = false;
@@ -49,6 +60,7 @@ class AppController extends ChangeNotifier {
   List<Country>? get countries => _countries;
   bool get loadingHolidays => _loadingHolidays;
   CountdownSnapshot get snapshot => _snapshot;
+  UiPrefs get prefs => _prefs;
 
   /// Needed years whose holidays couldn't be loaded.
   List<int> get missingYears =>
@@ -60,6 +72,43 @@ class AppController extends ChangeNotifier {
   }
 
   DayInfo classify(CalendarDate date) => _engine.classifier.classify(date);
+
+  /// National public holidays from today on, soonest first.
+  List<Holiday> upcomingHolidays({int limit = 6}) {
+    final today = CalendarDate.fromDateTime(clock());
+    return ([
+      for (final e in _holidays.byDate.entries)
+        if (e.key >= today) ...e.value.where((h) => h.isNationalDayOff),
+    ]..sort((a, b) => a.date.compareTo(b.date))).take(limit).toList();
+  }
+
+  /// The time off that just started and hasn't been celebrated yet.
+  OffBlock? get celebrationDue {
+    final state = _snapshot.state;
+    if (state is! OffNow) return null;
+    final start = state.block.offStart;
+    if (start == null) return null;
+    if (clock().difference(start) > celebrateWithin) return null;
+    final done = _prefs.celebratedUntil;
+    if (done != null && !start.isAfter(done)) return null;
+    return state.block;
+  }
+
+  Future<void> markCelebrated(OffBlock block) =>
+      _updatePrefs(_prefs.copyWith(celebratedUntil: block.offStart ?? clock()));
+
+  Future<void> dismissWidgetTip() =>
+      _updatePrefs(_prefs.copyWith(widgetTipDone: true));
+
+  Future<void> markOrbTipDone() => _prefs.orbTipDone
+      ? Future.value()
+      : _updatePrefs(_prefs.copyWith(orbTipDone: true));
+
+  Future<void> _updatePrefs(UiPrefs prefs) {
+    _prefs = prefs;
+    notifyListeners();
+    return _prefsRepository.save(prefs);
+  }
 
   Set<int> get _neededYears {
     final now = clock();
@@ -78,6 +127,10 @@ class AppController extends ChangeNotifier {
     } else {
       _settings = saved;
     }
+    final prefs = await _prefsRepository.load();
+    // Don't greet a new user with a party for a weekend already underway.
+    _prefs = prefs ?? UiPrefs(celebratedUntil: clock());
+    if (prefs == null) await _prefsRepository.save(_prefs);
     _countries = await _holidayRepository.cachedCountries();
     final code = _settings.countryCode;
     if (code != null) {

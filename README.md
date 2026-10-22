@@ -4,7 +4,8 @@ Counts down to the end of your last shift before the next weekend or public holi
 
 - **Countdown:** counts down to when work actually ends, e.g. Friday 18:00, using your workdays and shift hours. A Wednesday holiday counts to Tuesday 18:00. A Friday holiday turns the weekend into a long weekend starting Thursday 18:00. While you're off, it counts down to the start of your next shift.
 - **Public holidays:** from [Nager.Date](https://date.nager.at) for your country. They're cached per year, so the app works offline.
-- **Calendar:** tap a day to mark it as a day off (vacation) or as a workday. A workday override covers things like Russian transferred working Saturdays, or ignoring a holiday you work on. Long-press to select a range of days.
+- **Calendar:** tap a day to mark it as a day off (vacation) or as a workday. A workday override covers things like Russian transferred working Saturdays, or ignoring a holiday you work on. To select a range, long-press the first day, then tap the last.
+- **Design:** the iOS 26 look from the «Выходные» prototype: Wabi neutrals with lime and violet, a glass tab bar, an orb that fills as the week goes by, a line of the week with a crossed-out joke, and a "Weekend!" screen with confetti when time off starts. Light and dark follow the phone; reduced motion turns the animations off.
 - **Widgets:** the app precomputes about three months of countdown text and hands it to the native widget, so the widget stays correct without the app being open.
 
 ## Run
@@ -23,8 +24,12 @@ flutter run
 | `lib/domain/countdown_engine.dart` | Groups days off into blocks and computes the countdown target |
 | `lib/domain/widget_payload.dart` | The JSON segments the native widgets render |
 | `lib/state/app_controller.dart` | App state; every change saves, recomputes and updates the widget |
+| `lib/ui/theme/tokens.dart` | Colors, type ramp and motion curves for light and dark |
+| `lib/ui/kit/` | Shared components: glass, buttons, grouped rows, toggle, sheet, orb, rolling timer |
+| `lib/l10n/jokes.dart` | The lines under the orb, in English and Russian, and which fit when |
 | `lib/services/` | Storage, the Nager.Date client and its cache, the widget bridge (`home_widget`) |
 | `lib/l10n/` | ARB files for English and Russian, plus shared labels |
+| `assets/fonts/` | Inter, Inter Tight and JetBrains Mono (Latin and Cyrillic, SIL OFL 1.1) |
 | `android/app/src/main/kotlin/.../WeekCounterWidgetProvider.kt` | Android widget |
 | `ios/WeekCounterWidget/` | iOS WidgetKit extension |
 

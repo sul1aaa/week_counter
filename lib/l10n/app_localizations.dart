@@ -107,7 +107,7 @@ abstract class AppLocalizations {
   /// No description provided for @navCountdown.
   ///
   /// In en, this message translates to:
-  /// **'Countdown'**
+  /// **'Week'**
   String get navCountdown;
 
   /// No description provided for @navCalendar.
@@ -176,18 +176,6 @@ abstract class AppLocalizations {
   /// **'In shift until {time}'**
   String inShiftUntil(String time);
 
-  /// No description provided for @untilWhen.
-  ///
-  /// In en, this message translates to:
-  /// **'until {when}'**
-  String untilWhen(String when);
-
-  /// No description provided for @dayNofM.
-  ///
-  /// In en, this message translates to:
-  /// **'Day {n} of {m}'**
-  String dayNofM(int n, int m);
-
   /// No description provided for @daysOffCount.
   ///
   /// In en, this message translates to:
@@ -199,30 +187,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'in {duration}'**
   String inDuration(String duration);
-
-  /// No description provided for @boxDays.
-  ///
-  /// In en, this message translates to:
-  /// **'days'**
-  String get boxDays;
-
-  /// No description provided for @boxHours.
-  ///
-  /// In en, this message translates to:
-  /// **'hours'**
-  String get boxHours;
-
-  /// No description provided for @boxMinutes.
-  ///
-  /// In en, this message translates to:
-  /// **'min'**
-  String get boxMinutes;
-
-  /// No description provided for @boxSeconds.
-  ///
-  /// In en, this message translates to:
-  /// **'sec'**
-  String get boxSeconds;
 
   /// No description provided for @dayShort.
   ///
@@ -265,18 +229,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Days off'**
   String get kindDaysOff;
-
-  /// No description provided for @nextWeekend.
-  ///
-  /// In en, this message translates to:
-  /// **'Next weekend'**
-  String get nextWeekend;
-
-  /// No description provided for @nextHoliday.
-  ///
-  /// In en, this message translates to:
-  /// **'Next holiday'**
-  String get nextHoliday;
 
   /// No description provided for @noneComing.
   ///
@@ -326,18 +278,6 @@ abstract class AppLocalizations {
   /// **'Open calendar'**
   String get openCalendar;
 
-  /// No description provided for @pickCountryBanner.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose your country to include public holidays.'**
-  String get pickCountryBanner;
-
-  /// No description provided for @chooseCountry.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose country'**
-  String get chooseCountry;
-
   /// No description provided for @holidaysNotLoaded.
   ///
   /// In en, this message translates to:
@@ -373,18 +313,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Extra workday'**
   String get legendWorkday;
-
-  /// No description provided for @holidaysThisMonth.
-  ///
-  /// In en, this message translates to:
-  /// **'Holidays this month'**
-  String get holidaysThisMonth;
-
-  /// No description provided for @noHolidaysThisMonth.
-  ///
-  /// In en, this message translates to:
-  /// **'No public holidays this month'**
-  String get noHolidaysThisMonth;
 
   /// No description provided for @calendarHint.
   ///
@@ -613,6 +541,438 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Public holidays from Nager.Date (date.nager.at)'**
   String get dataSource;
+
+  /// No description provided for @weekdayName.
+  ///
+  /// In en, this message translates to:
+  /// **'{day, select, 1{Monday} 2{Tuesday} 3{Wednesday} 4{Thursday} 5{Friday} 6{Saturday} 7{Sunday} other{Friday}}'**
+  String weekdayName(String day);
+
+  /// No description provided for @monthIn.
+  ///
+  /// In en, this message translates to:
+  /// **'{month, select, 1{in January} 2{in February} 3{in March} 4{in April} 5{in May} 6{in June} 7{in July} 8{in August} 9{in September} 10{in October} 11{in November} 12{in December} other{this month}}'**
+  String monthIn(String month);
+
+  /// No description provided for @durationDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String durationDays(int count);
+
+  /// No description provided for @durationHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 hour} other{{count} hours}}'**
+  String durationHours(int count);
+
+  /// No description provided for @durationMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min'**
+  String durationMinutes(int count);
+
+  /// No description provided for @durationSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 second} other{{count} seconds}}'**
+  String durationSeconds(int count);
+
+  /// No description provided for @timerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'d'**
+  String get timerDay;
+
+  /// No description provided for @timerHour.
+  ///
+  /// In en, this message translates to:
+  /// **'h'**
+  String get timerHour;
+
+  /// No description provided for @timerMinute.
+  ///
+  /// In en, this message translates to:
+  /// **'m'**
+  String get timerMinute;
+
+  /// No description provided for @whenToday.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get whenToday;
+
+  /// No description provided for @whenTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'tomorrow'**
+  String get whenTomorrow;
+
+  /// No description provided for @whenAt.
+  ///
+  /// In en, this message translates to:
+  /// **'{day}, {time}'**
+  String whenAt(String day, String time);
+
+  /// No description provided for @eyebrowUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'until'**
+  String get eyebrowUntil;
+
+  /// No description provided for @eyebrowFreedom.
+  ///
+  /// In en, this message translates to:
+  /// **'freedom'**
+  String get eyebrowFreedom;
+
+  /// No description provided for @eyebrowLastHourPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'freedom in'**
+  String get eyebrowLastHourPrefix;
+
+  /// No description provided for @eyebrowLastHourStrike.
+  ///
+  /// In en, this message translates to:
+  /// **'forever'**
+  String get eyebrowLastHourStrike;
+
+  /// No description provided for @eyebrowLastHourSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'under an hour'**
+  String get eyebrowLastHourSuffix;
+
+  /// No description provided for @eyebrowOffStrike.
+  ///
+  /// In en, this message translates to:
+  /// **'until work'**
+  String get eyebrowOffStrike;
+
+  /// No description provided for @eyebrowWeekendLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'weekend left'**
+  String get eyebrowWeekendLeft;
+
+  /// No description provided for @eyebrowLongWeekendLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'long weekend left'**
+  String get eyebrowLongWeekendLeft;
+
+  /// No description provided for @eyebrowHolidayStrike.
+  ///
+  /// In en, this message translates to:
+  /// **'workday'**
+  String get eyebrowHolidayStrike;
+
+  /// No description provided for @eyebrowHolidayLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'holiday'**
+  String get eyebrowHolidayLeft;
+
+  /// No description provided for @eyebrowDaysOffStrike.
+  ///
+  /// In en, this message translates to:
+  /// **'work'**
+  String get eyebrowDaysOffStrike;
+
+  /// No description provided for @eyebrowDaysOffLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'still off for'**
+  String get eyebrowDaysOffLeft;
+
+  /// No description provided for @weekDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of the week done'**
+  String weekDone(int percent);
+
+  /// No description provided for @backToWorkLower.
+  ///
+  /// In en, this message translates to:
+  /// **'back to work'**
+  String get backToWorkLower;
+
+  /// No description provided for @orbTip.
+  ///
+  /// In en, this message translates to:
+  /// **'tap the orb for a new line'**
+  String get orbTip;
+
+  /// No description provided for @orbLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% done. Tap for a new line'**
+  String orbLabel(int percent);
+
+  /// No description provided for @jokesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Lines of the week'**
+  String get jokesLabel;
+
+  /// No description provided for @jokesMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Other lines'**
+  String get jokesMore;
+
+  /// No description provided for @hintCountryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Count public holidays'**
+  String get hintCountryTitle;
+
+  /// No description provided for @hintCountryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your country so holidays shorten the week'**
+  String get hintCountryBody;
+
+  /// No description provided for @hintHolidaysFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Holidays not loaded'**
+  String get hintHolidaysFailedTitle;
+
+  /// No description provided for @weekendLonger.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{The weekend is 1 day longer} other{The weekend is {count} days longer}}'**
+  String weekendLonger(int count);
+
+  /// No description provided for @aheadLongWeekend.
+  ///
+  /// In en, this message translates to:
+  /// **'Long weekend ahead'**
+  String get aheadLongWeekend;
+
+  /// No description provided for @aheadHoliday.
+  ///
+  /// In en, this message translates to:
+  /// **'Holiday ahead'**
+  String get aheadHoliday;
+
+  /// No description provided for @aheadDaysOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Time off ahead'**
+  String get aheadDaysOff;
+
+  /// No description provided for @widgetTipTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Countdown on your home screen'**
+  String get widgetTipTitle;
+
+  /// No description provided for @widgetTipBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the widget in half a minute'**
+  String get widgetTipBody;
+
+  /// No description provided for @widgetsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Widgets'**
+  String get widgetsTitle;
+
+  /// No description provided for @widgetStepIos1.
+  ///
+  /// In en, this message translates to:
+  /// **'Touch and hold an empty spot on the home screen'**
+  String get widgetStepIos1;
+
+  /// No description provided for @widgetStepIos2.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Edit, then Add Widget'**
+  String get widgetStepIos2;
+
+  /// No description provided for @widgetStepIos3.
+  ///
+  /// In en, this message translates to:
+  /// **'Find Week Counter and pick a size'**
+  String get widgetStepIos3;
+
+  /// No description provided for @widgetStepAndroid1.
+  ///
+  /// In en, this message translates to:
+  /// **'Touch and hold an empty spot on the home screen'**
+  String get widgetStepAndroid1;
+
+  /// No description provided for @widgetStepAndroid2.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Widgets'**
+  String get widgetStepAndroid2;
+
+  /// No description provided for @widgetStepAndroid3.
+  ///
+  /// In en, this message translates to:
+  /// **'Find Week Counter and drag it onto the screen'**
+  String get widgetStepAndroid3;
+
+  /// No description provided for @widgetUpdatesNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The numbers update on their own, even when the app is closed.'**
+  String get widgetUpdatesNote;
+
+  /// No description provided for @gotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get gotIt;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @daysOffIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Days off {monthIn}'**
+  String daysOffIn(String monthIn);
+
+  /// No description provided for @holidayOn.
+  ///
+  /// In en, this message translates to:
+  /// **'holiday {date}'**
+  String holidayOn(String date);
+
+  /// No description provided for @noHolidaysShort.
+  ///
+  /// In en, this message translates to:
+  /// **'no holidays'**
+  String get noHolidaysShort;
+
+  /// No description provided for @upcomingHolidays.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming holidays'**
+  String get upcomingHolidays;
+
+  /// No description provided for @noUpcomingHolidays.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a country to see public holidays'**
+  String get noUpcomingHolidays;
+
+  /// No description provided for @settingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes save right away. The countdown and widget update on their own.'**
+  String get settingsSubtitle;
+
+  /// No description provided for @workdaysHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a day to make it a workday or a day off'**
+  String get workdaysHint;
+
+  /// No description provided for @shiftStartsAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts'**
+  String get shiftStartsAt;
+
+  /// No description provided for @shiftEndsAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends'**
+  String get shiftEndsAt;
+
+  /// No description provided for @celebrateWeekend.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekend!'**
+  String get celebrateWeekend;
+
+  /// No description provided for @celebrateLongWeekend.
+  ///
+  /// In en, this message translates to:
+  /// **'Long weekend!'**
+  String get celebrateLongWeekend;
+
+  /// No description provided for @celebrateHoliday.
+  ///
+  /// In en, this message translates to:
+  /// **'Holiday!'**
+  String get celebrateHoliday;
+
+  /// No description provided for @celebrateDaysOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Time off!'**
+  String get celebrateDaysOff;
+
+  /// No description provided for @celebrateEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'the week is done'**
+  String get celebrateEyebrow;
+
+  /// No description provided for @celebrateLateEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'late, but from the heart'**
+  String get celebrateLateEyebrow;
+
+  /// No description provided for @celebrateWas.
+  ///
+  /// In en, this message translates to:
+  /// **'work'**
+  String get celebrateWas;
+
+  /// No description provided for @celebrateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Work\'s over. The next {duration} are yours.'**
+  String celebrateBody(String duration);
+
+  /// No description provided for @celebrateBodyOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Work\'s over. Enjoy it.'**
+  String get celebrateBodyOpen;
+
+  /// No description provided for @celebrateLateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The week ended {when}. Celebrating anyway.'**
+  String celebrateLateBody(String when);
+
+  /// No description provided for @celebrateCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Yay, time to rest'**
+  String get celebrateCta;
 
   /// No description provided for @widgetSetUp.
   ///

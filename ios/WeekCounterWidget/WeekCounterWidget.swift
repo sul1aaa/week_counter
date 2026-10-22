@@ -146,6 +146,14 @@ struct Provider: TimelineProvider {
 
 // MARK: - View
 
+/// Colors from the app's design: a near-black card in both themes.
+enum Palette {
+    static let background = Color(red: 0x11 / 255, green: 0x11 / 255, blue: 0x11 / 255)
+    static let ink = Color(red: 0xF5 / 255, green: 0xF5 / 255, blue: 0xF5 / 255)
+    static let ink2 = Color(red: 0xA3 / 255, green: 0xA1 / 255, blue: 0x9C / 255)
+    static let violet = Color(red: 0xB9 / 255, green: 0xA0 / 255, blue: 0xFF / 255)
+}
+
 struct WeekCounterWidgetEntryView: View {
     var entry: CountdownEntry
     @Environment(\.widgetFamily) private var family
@@ -153,8 +161,8 @@ struct WeekCounterWidgetEntryView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(entry.title)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.tint)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Palette.ink2)
                 .lineLimit(1)
             if let end = entry.timerEnd, end > entry.date {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
@@ -163,14 +171,16 @@ struct WeekCounterWidgetEntryView: View {
                     }
                     Text(timerInterval: entry.date...end, countsDown: true)
                 }
-                .font(.system(size: family == .systemSmall ? 26 : 34, weight: .bold, design: .rounded))
+                .font(.system(size: family == .systemSmall ? 28 : 36, weight: .bold))
+                .kerning(-1)
                 .monospacedDigit()
+                .foregroundStyle(Palette.ink)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
             }
             Text(entry.subtitle)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Palette.ink2)
                 .lineLimit(2)
             if family != .systemSmall, let secondary = entry.secondary {
                 Text(secondary)
@@ -180,13 +190,7 @@ struct WeekCounterWidgetEntryView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .containerBackground(for: .widget) {
-            LinearGradient(
-                colors: [Color.indigo.opacity(0.22), Color.purple.opacity(0.10)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        }
+        .containerBackground(for: .widget) { Palette.background }
     }
 }
 
@@ -197,7 +201,7 @@ struct WeekCounterWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             WeekCounterWidgetEntryView(entry: entry)
-                .tint(.indigo)
+                .tint(Palette.violet)
         }
         .configurationDisplayName(L10n.name)
         .description(L10n.description)

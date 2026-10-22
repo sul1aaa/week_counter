@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/calendar_date.dart';
+import '../../domain/countdown_engine.dart';
 import '../../domain/day_classifier.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/labels.dart';
 import '../../models/app_settings.dart';
 import '../../state/app_controller.dart';
+import '../kit/app_page.dart';
+import '../kit/buttons.dart';
+import '../kit/glass.dart';
+import '../kit/group.dart';
+import '../kit/pressable.dart';
+import '../theme/tokens.dart';
 import '../widgets/day_detail_sheet.dart';
+import '../widgets/week_strip.dart';
+import 'country_picker_screen.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key, required this.controller});
@@ -19,30 +28,29 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-  late DateTime _focused = widget.controller.clock();
-  DateTime? _rangeStart;
-  DateTime? _rangeEnd;
-  RangeSelectionMode _rangeMode = RangeSelectionMode.toggledOff;
+  final _scroll = ScrollController();
+  CalendarDate? _rangeStart;
+  CalendarDate? _rangeEnd;
 
   AppController get _controller => widget.controller;
 
-  static CalendarDate _date(DateTime day) =>
-      CalendarDate(day.year, day.month, day.day);
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
 
   List<CalendarDate> get _selectedDates {
     final start = _rangeStart;
     if (start == null) return const [];
-    final first = _date(start);
-    final last = _rangeEnd == null ? first : _date(_rangeEnd!);
-    return [
-      for (var d = first; d <= last; d = d.addDays(1)) d,
-    ];
+    final end = _rangeEnd ?? start;
+    final (first, last) = start <= end ? (start, end) : (end, start);
+    return [for (var d = first; d <= last; d = d.addDays(1)) d];
   }
 
   void _clearRange() => setState(() {
     _rangeStart = null;
     _rangeEnd = null;
-    _rangeMode = RangeSelectionMode.toggledOff;
   });
 
   Future<void> _applyToRange(DayOverride? value) async {
@@ -51,223 +59,267 @@ class _CalendarScreenState extends State<CalendarScreen> {
     await _controller.setOverride(dates, value);
   }
 
-  void _onDaySelected(DateTime day, DateTime focused) {
-    if (_rangeMode == RangeSelectionMode.toggledOn) {
-      // A long press while selecting turns range mode off again.
-      _clearRange();
+  void _onTap(CalendarDate date) {
+    if (_rangeStart != null) {
+      setState(() => _rangeEnd = date);
       return;
     }
-    setState(() => _focused = focused);
-    showDayDetailSheet(context, _controller, _date(day));
+    showDayDetailSheet(context, _controller, date);
   }
+
+  void _onLongPress(CalendarDate date) => setState(() {
+    _rangeStart = date;
+    _rangeEnd = null;
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final now = _controller.clock();
-    final firstDayIndex = MaterialLocalizations.of(context).firstDayOfWeekIndex;
+    final t = context.tokens;
+    final bottom = MediaQuery.paddingOf(context).bottom;
 
     return ListenableBuilder(
       listenable: _controller,
       builder: (context, _) {
-        final holidays = _controller.holidays.inMonth(
-          _focused.year,
-          _focused.month,
-        );
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(l10n.navCalendar),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.today),
-                onPressed: () => setState(() => _focused = now),
-              ),
-            ],
-          ),
-          body: ListView(
-            padding: const EdgeInsets.only(bottom: 24),
-            children: [
-              TableCalendar<void>(
-                locale: l10n.localeName,
-                firstDay: DateTime(now.year, 1, 1),
-                lastDay: DateTime(now.year + 1, 12, 31),
-                focusedDay: _focused,
-                currentDay: now,
-                // MaterialLocalizations counts from Sunday = 0.
-                startingDayOfWeek:
-                    StartingDayOfWeek.values[(firstDayIndex + 6) % 7],
-                availableCalendarFormats: const {CalendarFormat.month: ''},
-                headerStyle: const HeaderStyle(
-                  formatButtonVisible: false,
-                  titleCentered: true,
-                ),
-                weekendDays: const [],
-                rowHeight: 48,
-                calendarStyle: CalendarStyle(
-                  outsideDaysVisible: false,
-                  rangeHighlightColor: theme.colorScheme.primary.withValues(
-                    alpha: 0.15,
-                  ),
-                  rangeStartDecoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  rangeEndDecoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  withinRangeTextStyle: TextStyle(
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                rangeSelectionMode: _rangeMode,
-                rangeStartDay: _rangeStart,
-                rangeEndDay: _rangeEnd,
-                onDaySelected: _onDaySelected,
-                onRangeSelected: (start, end, focused) => setState(() {
-                  _rangeStart = start;
-                  _rangeEnd = end;
-                  _focused = focused;
-                  _rangeMode = RangeSelectionMode.toggledOn;
-                }),
-                onPageChanged: (focused) => setState(() => _focused = focused),
-                calendarBuilders: CalendarBuilders(
-                  defaultBuilder: (context, day, _) => _DayCell(
-                    day: day,
-                    info: _controller.classify(_date(day)),
-                  ),
-                  todayBuilder: (context, day, _) => _DayCell(
-                    day: day,
-                    info: _controller.classify(_date(day)),
-                    isToday: true,
-                  ),
+        final now = _controller.clock();
+        final today = CalendarDate.fromDateTime(now);
+        final snapshot = _controller.snapshot;
+        final first = firstWeekday(context);
+        final selected = _selectedDates.toSet();
+        final upcoming = snapshot.upcoming.take(10).toList();
+        final holidays = _controller.upcomingHolidays();
+        final code = _controller.settings.countryCode;
+
+        return Stack(
+          children: [
+            AppPage(
+              title: l10n.navCalendar,
+              controller: _scroll,
+              trailing: GlassButton(
+                icon: Icons.today_rounded,
+                label: l10n.today,
+                onTap: () => _scroll.animateTo(
+                  0,
+                  duration: Motion.slow,
+                  curve: Motion.ios,
                 ),
               ),
-              if (_rangeMode == RangeSelectionMode.toggledOn &&
-                  _rangeStart != null)
-                _RangeBar(
-                  count: _selectedDates.length,
+              onRefresh: () => _controller.refreshHolidays(force: true),
+              bottomPadding: bottom + (selected.isEmpty ? 104 : 260),
+              children: [
+                const SizedBox(height: 16),
+                _Summary(controller: _controller, now: now),
+                const _Legend(),
+                const SizedBox(height: 12),
+                Group(
+                  children: [
+                    GroupRow(
+                      icon: Icons.celebration_rounded,
+                      title: l10n.sectionHolidays,
+                      value: _controller.countryName(code) ?? l10n.noCountry,
+                      onTap: () =>
+                          CountryPickerScreen.open(context, _controller),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 8, 32, 0),
+                  child: Text(l10n.calendarHint, style: t.footnote),
+                ),
+                for (var i = 0; i < 12; i++)
+                  _MonthGrid(
+                    month: DateTime(today.year, today.month + i),
+                    today: today,
+                    firstWeekday: first,
+                    classify: _controller.classify,
+                    selected: selected,
+                    onTap: _onTap,
+                    onLongPress: _onLongPress,
+                  ),
+                if (upcoming.isNotEmpty) ...[
+                  SectionTitle(l10n.upcomingDaysOff),
+                  Group(
+                    children: [
+                      for (final block in upcoming)
+                        GroupRow(
+                          icon: blockIcon(block.kind),
+                          title:
+                              l10n.blockDetails(block) ??
+                              l10n.kindLabel(block.kind),
+                          subtitle:
+                              '${l10n.dateRange(block.first, block.last)} · '
+                              '${l10n.daysOffCount(block.length)}',
+                          value: l10n.inDuration(
+                            l10n.compactDuration(
+                              block.offStart!.difference(now),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+                SectionTitle(l10n.upcomingHolidays),
+                Group(
+                  children: [
+                    if (code == null || holidays.isEmpty)
+                      GroupRow(
+                        title: code == null
+                            ? l10n.noUpcomingHolidays
+                            : l10n.noneComing,
+                        onTap: code == null
+                            ? () =>
+                                  CountryPickerScreen.open(context, _controller)
+                            : null,
+                      ),
+                    for (final holiday in holidays)
+                      GroupRow(
+                        title: l10n.holidayName(holiday),
+                        value: l10n.date(holiday.date),
+                        onTap: () => showDayDetailSheet(
+                          context,
+                          _controller,
+                          holiday.date,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+            if (selected.isNotEmpty)
+              Positioned(
+                left: 16,
+                right: 16,
+                bottom: (bottom > 0 ? bottom - 13 : 12) + 62 + 12,
+                child: _RangeBar(
+                  count: selected.length,
                   onCancel: _clearRange,
                   onReset: () => _applyToRange(null),
                   onMarkOff: () =>
                       _applyToRange(const DayOverride(OverrideKind.dayOff)),
                 ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
-                child: _Legend(),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                child: Text(
-                  l10n.calendarHint,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 4),
-                child: Text(
-                  l10n.holidaysThisMonth,
-                  style: theme.textTheme.titleMedium,
-                ),
-              ),
-              if (holidays.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    l10n.noHolidaysThisMonth,
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                ),
-              for (final holiday in holidays)
-                ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: theme.colorScheme.errorContainer,
-                    foregroundColor: theme.colorScheme.onErrorContainer,
-                    child: Text('${holiday.date.day}'),
-                  ),
-                  title: Text(l10n.holidayName(holiday)),
-                  subtitle: Text(l10n.date(holiday.date)),
-                  onTap: () =>
-                      showDayDetailSheet(context, _controller, holiday.date),
-                ),
-            ],
-          ),
+          ],
         );
       },
     );
   }
 }
 
-/// Colors shared by calendar cells and the legend.
-({Color background, Color foreground})? _dayColors(
-  ColorScheme scheme,
-  DayInfo info,
-) {
-  if (info.isWork) return null;
-  if (info.reasons.contains(OffReason.publicHoliday)) {
-    return (
-      background: scheme.errorContainer,
-      foreground: scheme.onErrorContainer,
-    );
-  }
-  if (info.reasons.contains(OffReason.custom)) {
-    return (background: scheme.primary, foreground: scheme.onPrimary);
-  }
-  return (
-    background: scheme.secondaryContainer,
-    foreground: scheme.onSecondaryContainer,
-  );
-}
+IconData blockIcon(BlockKind kind) => switch (kind) {
+  BlockKind.weekend => Icons.weekend_rounded,
+  BlockKind.longWeekend => Icons.wb_sunny_rounded,
+  BlockKind.holiday => Icons.celebration_rounded,
+  BlockKind.daysOff => Icons.beach_access_rounded,
+};
 
-class _DayCell extends StatelessWidget {
-  const _DayCell({required this.day, required this.info, this.isToday = false});
+/// Two cards: time to the next change, and days off this month.
+class _Summary extends StatelessWidget {
+  const _Summary({required this.controller, required this.now});
 
-  final DateTime day;
-  final DayInfo info;
-  final bool isToday;
+  final AppController controller;
+  final DateTime now;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final colors = _dayColors(scheme, info);
-    final foreground = colors?.foreground ?? scheme.onSurface;
-    final hasNote = info.override?.note?.isNotEmpty ?? false;
-    return Container(
-      margin: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: colors?.background,
-        borderRadius: BorderRadius.circular(12),
-        border: isToday
-            ? Border.all(color: scheme.primary, width: 2)
-            : info.isExtraWorkday
-            ? Border.all(color: scheme.outline, width: 1.5)
-            : null,
+    final l10n = AppLocalizations.of(context);
+    final today = CalendarDate.fromDateTime(now);
+    final (label, target) = switch (controller.snapshot.state) {
+      CountingDown(:final target, :final block) => (
+        l10n.untilTitle(block.kind),
+        target,
       ),
-      alignment: Alignment.center,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '${day.day}',
-            style: TextStyle(
-              color: foreground,
-              fontWeight: isToday ? FontWeight.w800 : FontWeight.w500,
-            ),
-          ),
-          if (hasNote)
-            Container(
-              width: 4,
-              height: 4,
-              margin: const EdgeInsets.only(top: 2),
-              decoration: BoxDecoration(
-                color: foreground,
-                shape: BoxShape.circle,
+      OffNow(:final backToWork) => (l10n.backToWorkIn, backToWork),
+      _ => (l10n.appTitle, null),
+    };
+    var daysOff = 0;
+    for (
+      var d = CalendarDate(today.year, today.month, 1);
+      d.month == today.month;
+      d = d.addDays(1)
+    ) {
+      if (controller.classify(d).isOff) daysOff++;
+    }
+    final nextHoliday = controller.upcomingHolidays(limit: 1).firstOrNull;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: _SummaryCard(
+                label: label,
+                value: target == null
+                    ? '—'
+                    : l10n.compactDuration(target.difference(now)),
+                detail: target == null ? null : l10n.when(target, now),
               ),
             ),
-        ],
+            const SizedBox(width: 8),
+            Expanded(
+              child: _SummaryCard(
+                label: l10n.daysOffIn(l10n.monthIn('${today.month}')),
+                value: '$daysOff',
+                detail: nextHoliday == null
+                    ? l10n.noHolidaysShort
+                    : l10n.holidayOn(
+                        DateFormat.MMMd(
+                          l10n.localeName,
+                        ).format(nextHoliday.date.startOfDay),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SummaryCard extends StatelessWidget {
+  const _SummaryCard({required this.label, required this.value, this.detail});
+
+  final String label;
+  final String value;
+  final String? detail;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return MergeSemantics(
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+        decoration: BoxDecoration(
+          color: t.surface,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: t.footnote),
+            const SizedBox(height: 4),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontFamily: Fonts.display,
+                  fontSize: 26,
+                  height: 30 / 26,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -1.04,
+                  fontFeatures: Fonts.tabular,
+                  color: t.ink,
+                ),
+              ),
+            ),
+            if (detail != null) ...[
+              const SizedBox(height: 4),
+              Text(detail!, style: t.footnote),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -279,32 +331,356 @@ class _Legend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final scheme = Theme.of(context).colorScheme;
-    Widget item(String label, {Color? color, Color? border}) => Row(
+    final t = context.tokens;
+    Widget item(String label, Widget swatch) => Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: 14,
-          height: 14,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(4),
-            border: border == null ? null : Border.all(color: border),
-          ),
-        ),
+        swatch,
         const SizedBox(width: 6),
-        Text(label, style: Theme.of(context).textTheme.labelMedium),
+        Text(label, style: t.footnote),
       ],
     );
-    return Wrap(
-      spacing: 16,
-      runSpacing: 8,
+    Widget square({Color? color, Widget? child, Border? border}) => Container(
+      width: 12,
+      height: 12,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(4),
+        border: border,
+      ),
+      child: child,
+    );
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Wrap(
+        spacing: 16,
+        runSpacing: 8,
+        children: [
+          item(
+            l10n.legendWeekend,
+            square(
+              color: t.limeSoft,
+              border: Border.all(
+                color: t.limeInk.withValues(alpha: 0.35),
+                width: 1,
+              ),
+            ),
+          ),
+          item(
+            l10n.legendHoliday,
+            Container(
+              width: 8,
+              height: 8,
+              margin: const EdgeInsets.all(2),
+              decoration: BoxDecoration(color: t.ink, shape: BoxShape.circle),
+            ),
+          ),
+          item(
+            l10n.legendDayOff,
+            square(
+              color: t.surface,
+              child: CustomPaint(painter: StripesPainter(t.surface3, gap: 3)),
+            ),
+          ),
+          item(
+            l10n.legendWorkday,
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: t.ink2, width: 1.5),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MonthGrid extends StatelessWidget {
+  const _MonthGrid({
+    required this.month,
+    required this.today,
+    required this.firstWeekday,
+    required this.classify,
+    required this.selected,
+    required this.onTap,
+    required this.onLongPress,
+  });
+
+  final DateTime month;
+  final CalendarDate today;
+  final int firstWeekday;
+  final DayInfo Function(CalendarDate) classify;
+  final Set<CalendarDate> selected;
+  final ValueChanged<CalendarDate> onTap;
+  final ValueChanged<CalendarDate> onLongPress;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final t = context.tokens;
+    final first = CalendarDate(month.year, month.month, 1);
+    final days = DateUtils.getDaysInMonth(month.year, month.month);
+    final lead = (first.weekday - firstWeekday + 7) % 7;
+    final name = DateFormat.LLLL(l10n.localeName).format(month);
+    final title =
+        '${name[0].toUpperCase()}${name.substring(1)}'
+        '${month.year != today.year ? ' ${month.year}' : ''}';
+
+    final cells = <Widget>[
+      for (var i = 0; i < lead; i++) const SizedBox(),
+      for (var d = 1; d <= days; d++)
+        _CalendarDay(
+          date: CalendarDate(month.year, month.month, d),
+          today: today,
+          classify: classify,
+          selected: selected,
+          rowStart: (lead + d - 1) % 7 == 0,
+          rowEnd: (lead + d - 1) % 7 == 6,
+          monthEnd: d == days,
+          onTap: onTap,
+          onLongPress: onLongPress,
+        ),
+    ];
+    while (cells.length % 7 != 0) {
+      cells.add(const SizedBox());
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        item(l10n.legendWeekend, color: scheme.secondaryContainer),
-        item(l10n.legendHoliday, color: scheme.errorContainer),
-        item(l10n.legendDayOff, color: scheme.primary),
-        item(l10n.legendWorkday, border: scheme.outline),
+        SectionTitle(title),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Column(
+            children: [
+              ExcludeSemantics(
+                child: Row(
+                  children: [
+                    for (var i = 0; i < 7; i++)
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            l10n.weekdayCaps((firstWeekday - 1 + i) % 7 + 1),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: Fonts.text,
+                              fontSize: 11,
+                              height: 14 / 11,
+                              fontWeight: FontWeight.w600,
+                              color: t.ink2,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              for (var row = 0; row < cells.length ~/ 7; row++)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    children: [
+                      for (final cell in cells.skip(row * 7).take(7))
+                        Expanded(child: SizedBox(height: 44, child: cell)),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
       ],
+    );
+  }
+}
+
+class _CalendarDay extends StatelessWidget {
+  const _CalendarDay({
+    required this.date,
+    required this.today,
+    required this.classify,
+    required this.selected,
+    required this.rowStart,
+    required this.rowEnd,
+    required this.monthEnd,
+    required this.onTap,
+    required this.onLongPress,
+  });
+
+  final CalendarDate date;
+  final CalendarDate today;
+  final DayInfo Function(CalendarDate) classify;
+  final Set<CalendarDate> selected;
+  final bool rowStart;
+  final bool rowEnd;
+  final bool monthEnd;
+  final ValueChanged<CalendarDate> onTap;
+  final ValueChanged<CalendarDate> onLongPress;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final l10n = AppLocalizations.of(context);
+    final info = classify(date);
+    final ownOff = info.isExtraOff && info.reasons.contains(OffReason.custom);
+    final off = info.isOff;
+    final past = date < today;
+    final isToday = date == today;
+    final holiday = info.holidays.isNotEmpty;
+    final inRange = selected.contains(date);
+
+    // Bars run across consecutive days; round where a run starts or ends.
+    bool sameKind(CalendarDate other) {
+      final o = classify(other);
+      final otherOwn = o.isExtraOff && o.reasons.contains(OffReason.custom);
+      return o.isOff && otherOwn == ownOff;
+    }
+
+    final startsRun = rowStart || date.day == 1 || !sameKind(date.addDays(-1));
+    final endsRun = rowEnd || monthEnd || !sameKind(date.addDays(1));
+    final rangeStarts =
+        rowStart || date.day == 1 || !selected.contains(date.addDays(-1));
+    final rangeEnds = rowEnd || monthEnd || !selected.contains(date.addDays(1));
+    BorderRadius bar(bool starts, bool ends) => BorderRadius.horizontal(
+      left: starts ? const Radius.circular(18) : Radius.zero,
+      right: ends ? const Radius.circular(18) : Radius.zero,
+    );
+    EdgeInsets inset(bool starts, bool ends) =>
+        EdgeInsets.fromLTRB(starts ? 4 : 0, 4, ends ? 4 : 0, 4);
+
+    Color number = past ? t.ink2 : t.ink;
+    if (off && !ownOff) number = past ? t.ink2 : t.limeInk;
+    if (ownOff) number = t.ink2;
+    final rangeEdge = inRange && (rangeStarts || rangeEnds);
+    if (isToday) number = t.onInverse;
+    if (rangeEdge) number = Colors.white;
+
+    final status = info.isOff
+        ? [
+            if (holiday) info.holidays.map(l10n.holidayName).join(', '),
+            if (ownOff && info.override?.note != null) info.override!.note!,
+            if (!holiday && !(ownOff && info.override?.note != null))
+              l10n.statusDayOff,
+          ].join(', ')
+        : info.isExtraWorkday
+        ? l10n.statusExtraWorkday
+        : l10n.statusWorkday;
+
+    return Semantics(
+      button: true,
+      selected: inRange,
+      label: '${l10n.longDate(date)}, $status',
+      excludeSemantics: true,
+      onTap: () => onTap(date),
+      onLongPress: () => onLongPress(date),
+      child: Pressable(
+        scale: 0.9,
+        onTap: () => onTap(date),
+        onLongPress: () => onLongPress(date),
+        child: Stack(
+          children: [
+            if (off)
+              Positioned.fill(
+                child: Padding(
+                  padding: inset(startsRun, endsRun),
+                  child: Opacity(
+                    opacity: past ? 0.6 : 1,
+                    child: Container(
+                      clipBehavior: Clip.antiAlias,
+                      decoration: BoxDecoration(
+                        color: ownOff ? null : t.limeSoft,
+                        borderRadius: bar(startsRun, endsRun),
+                      ),
+                      child: ownOff
+                          ? CustomPaint(
+                              painter: StripesPainter(t.surface2, gap: 5),
+                            )
+                          : null,
+                    ),
+                  ),
+                ),
+              ),
+            if (inRange)
+              Positioned.fill(
+                child: Padding(
+                  padding: inset(rangeStarts, rangeEnds),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: t.violetSoft.withValues(alpha: 0.85),
+                      borderRadius: bar(rangeStarts, rangeEnds),
+                    ),
+                  ),
+                ),
+              ),
+            Center(
+              child: Container(
+                width: 36,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: rangeEdge
+                      ? Tokens.violet
+                      : isToday
+                      ? t.inverse
+                      : null,
+                  border: info.isExtraWorkday && !isToday && !rangeEdge
+                      ? Border.all(color: t.ink2, width: 1.5)
+                      : null,
+                ),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.center,
+                  children: [
+                    Text(
+                      '${date.day}',
+                      style: TextStyle(
+                        fontFamily: Fonts.display,
+                        fontSize: 16,
+                        height: 1,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: -0.32,
+                        fontFeatures: Fonts.tabular,
+                        color: number,
+                      ),
+                    ),
+                    if (holiday)
+                      Positioned(
+                        top: -9,
+                        right: -9,
+                        child: Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: isToday ? t.onInverse : t.ink,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    if (info.override?.note?.isNotEmpty ?? false)
+                      Positioned(
+                        bottom: -9,
+                        child: Container(
+                          width: 4,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: number,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -325,33 +701,42 @@ class _RangeBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      child: Card(
-        color: Theme.of(context).colorScheme.surfaceContainerHigh,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.daysSelected(count),
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              Wrap(
-                alignment: WrapAlignment.end,
-                spacing: 4,
-                children: [
-                  TextButton(onPressed: onCancel, child: Text(l10n.cancel)),
-                  TextButton(onPressed: onReset, child: Text(l10n.resetToAuto)),
-                  FilledButton(
-                    onPressed: onMarkOff,
-                    child: Text(l10n.markDaysOff),
+    final t = context.tokens;
+    return Glass(
+      borderRadius: BorderRadius.circular(28),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Semantics(
+              liveRegion: true,
+              child: Text(l10n.daysSelected(count), style: t.navTitle),
+            ),
+            const SizedBox(height: 12),
+            AppButton(label: l10n.markDaysOff, onTap: onMarkOff),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: AppButton(
+                    label: l10n.cancel,
+                    kind: ButtonKind.ghost,
+                    onTap: onCancel,
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: AppButton(
+                    label: l10n.resetToAuto,
+                    kind: ButtonKind.secondary,
+                    onTap: onReset,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

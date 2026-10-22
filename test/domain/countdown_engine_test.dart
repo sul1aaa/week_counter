@@ -48,6 +48,25 @@ void main() {
       expect(s.validUntil, at(2026, 10, 21, 18));
     });
 
+    test('progress runs from Monday 09:00 to Friday 18:00', () {
+      final now = at(2026, 10, 21, 12);
+      final state = e.snapshot(now).state as CountingDown;
+      expect(state.since, at(2026, 10, 19, 9));
+      final total = at(2026, 10, 23, 18).difference(at(2026, 10, 19, 9));
+      final done = now.difference(at(2026, 10, 19, 9));
+      expect(
+        state.progress(now),
+        closeTo(done.inMinutes / total.inMinutes, 1e-9),
+      );
+    });
+
+    test('weekend progress is half done on Sunday 01:30', () {
+      final now = at(2026, 10, 25, 1, 30);
+      final state = e.snapshot(now).state as OffNow;
+      // Friday 18:00 to Monday 09:00 is 63 hours; 31.5 have passed.
+      expect(state.progress(now), closeTo(0.5, 1e-9));
+    });
+
     test('Friday evening is already off', () {
       final state = e.snapshot(at(2026, 10, 23, 19)).state as OffNow;
       expect(state.backToWork, at(2026, 10, 26, 9));
@@ -91,8 +110,16 @@ void main() {
       expect(state.block.kind, BlockKind.holiday);
       expect(state.block.length, 1);
       expect(state.block.offEnd, at(2026, 11, 5, 9));
+      expect(state.since, at(2026, 11, 2, 9));
       expect(s.nextHoliday, same(state.block));
       expect(s.nextWeekend!.offStart, at(2026, 11, 6, 18));
+    });
+
+    test('after a Wednesday holiday the week restarts on Thursday', () {
+      final e = engine(holidays: [holiday(2026, 11, 4, 'Unity Day')]);
+      final state = e.snapshot(at(2026, 11, 5, 12)).state as CountingDown;
+      expect(state.since, at(2026, 11, 5, 9));
+      expect(state.target, at(2026, 11, 6, 18));
     });
 
     test('Friday holiday makes a long weekend from Thursday 18:00', () {
@@ -222,9 +249,7 @@ void main() {
 
   group('degenerate schedules', () {
     test('no workdays', () {
-      final e = engine(
-        schedule: WorkSchedule.standard.copyWith(workdays: {}),
-      );
+      final e = engine(schedule: WorkSchedule.standard.copyWith(workdays: {}));
       expect(e.snapshot(at(2026, 10, 21, 12)).state, isA<NoWorkdays>());
     });
 

@@ -5,9 +5,11 @@ import 'package:week_counter/app.dart';
 import 'package:week_counter/services/holiday_api.dart';
 import 'package:week_counter/services/holiday_repository.dart';
 import 'package:week_counter/services/local_store.dart';
+import 'package:week_counter/services/prefs_repository.dart';
 import 'package:week_counter/services/settings_repository.dart';
 import 'package:week_counter/services/widget_sync.dart';
 import 'package:week_counter/state/app_controller.dart';
+import 'package:week_counter/ui/widgets/joke_carousel.dart';
 
 import 'services/fake_nager.dart';
 
@@ -15,6 +17,10 @@ void main() {
   setUpAll(initializeDateFormatting);
 
   late NoopWidgetSync widgetSync;
+  // Wednesday noon.
+  var now = DateTime(2026, 10, 21, 12);
+
+  setUp(() => now = DateTime(2026, 10, 21, 12));
 
   Future<AppController> createController() async {
     final store = InMemoryLocalStore();
@@ -25,18 +31,29 @@ void main() {
         store,
         NagerDateApi(client: FakeNager().client),
       ),
+      prefsRepository: PrefsRepository(store),
       widgetSync: widgetSync,
-      // Wednesday noon.
-      clock: () => DateTime(2026, 10, 21, 12),
+      clock: () => now,
       deviceLocale: () => const Locale('ru', 'RU'),
     );
     await controller.init();
     return controller;
   }
 
-  testWidgets('shows the countdown and navigates between tabs', (
-    tester,
-  ) async {
+  /// The orb and confetti move forever unless motion is reduced.
+  void reduceMotion(WidgetTester tester) {
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+  }
+
+  Future<void> openTab(WidgetTester tester, String name) async {
+    await tester.tap(find.byKey(ValueKey('tab.$name')));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('shows the countdown and navigates between tabs', (tester) async {
+    reduceMotion(tester);
     final controller = await createController();
     await tester.pumpWidget(
       WeekCounterApp(controller: controller, locale: const Locale('en')),
@@ -45,40 +62,45 @@ void main() {
 
     // The country was guessed from the phone's region.
     expect(controller.settings.countryCode, 'RU');
-    expect(find.text('Weekend in'), findsOneWidget);
-    expect(find.text('Next weekend'), findsOneWidget);
-    expect(find.text('Next holiday'), findsOneWidget);
-    expect(find.text('Unity Day'), findsWidgets);
+    expect(find.text('until'), findsOneWidget);
+    expect(find.text('Friday'), findsOneWidget);
+    expect(find.text('freedom'), findsOneWidget);
+    expect(find.textContaining('of the week done'), findsOneWidget);
     expect(find.text('In shift until 18:00'), findsOneWidget);
+    expect(find.text('Holiday ahead'), findsOneWidget);
+    expect(find.textContaining('Unity Day'), findsOneWidget);
+    await tester.scrollUntilVisible(find.byType(JokeCarousel), 200);
+    expect(find.byType(JokeCarousel), findsOneWidget);
 
-    await tester.tap(find.text('Calendar'));
-    await tester.pumpAndSettle();
-    expect(find.text('No public holidays this month'), findsOneWidget);
+    await openTab(tester, 'calendar');
+    expect(find.text('October'), findsOneWidget);
+    expect(find.text('Days off in October'), findsOneWidget);
 
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
+    await openTab(tester, 'settings');
     expect(find.text('Working time'), findsOneWidget);
     expect(find.text('Russia'), findsOneWidget);
   });
 
   testWidgets('renders in Russian and feeds the widget', (tester) async {
+    reduceMotion(tester);
     final controller = await createController();
     await tester.pumpWidget(
       WeekCounterApp(controller: controller, locale: const Locale('ru')),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('До выходных'), findsOneWidget);
-    expect(find.text('Ближайший праздник'), findsOneWidget);
+    expect(find.text('до'), findsOneWidget);
+    expect(find.text('пятницы'), findsOneWidget);
+    expect(find.text('свободы'), findsOneWidget);
+    expect(find.text('Впереди праздник'), findsOneWidget);
 
     final payload = widgetSync.lastPayload!;
     expect(payload.locale, 'ru');
     expect(payload.segments.first.title, 'До выходных');
   });
 
-  testWidgets('unchecking every workday shows the empty state', (
-    tester,
-  ) async {
+  testWidgets('unchecking every workday shows the empty state', (tester) async {
+    reduceMotion(tester);
     final controller = await createController();
     await controller.updateSchedule(
       controller.settings.schedule.copyWith(workdays: {}),
@@ -92,5 +114,31 @@ void main() {
     await tester.tap(find.text('Open settings'));
     await tester.pumpAndSettle();
     expect(find.text('Working time'), findsOneWidget);
+  });
+
+  testWidgets('celebrates once when the weekend starts', (tester) async {
+    reduceMotion(tester);
+    now = DateTime(2026, 10, 23, 17, 59, 58);
+    final controller = await createController();
+    await tester.pumpWidget(
+      WeekCounterApp(controller: controller, locale: const Locale('en')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Yay, time to rest'), findsNothing);
+
+    now = DateTime(2026, 10, 23, 18, 0, 1);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+    expect(find.text('Yay, time to rest'), findsOneWidget);
+
+    await tester.tap(find.text('Yay, time to rest'));
+    await tester.pumpAndSettle();
+    expect(find.text('Yay, time to rest'), findsNothing);
+    expect(find.text('weekend left'), findsOneWidget);
+
+    now = DateTime(2026, 10, 23, 18, 0, 5);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+    expect(find.text('Yay, time to rest'), findsNothing);
   });
 }

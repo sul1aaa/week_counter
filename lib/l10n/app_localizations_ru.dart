@@ -12,7 +12,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get appTitle => 'Счётчик выходных';
 
   @override
-  String get navCountdown => 'Отсчёт';
+  String get navCountdown => 'Неделя';
 
   @override
   String get navCalendar => 'Календарь';
@@ -52,16 +52,6 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String untilWhen(String when) {
-    return 'до $when';
-  }
-
-  @override
-  String dayNofM(int n, int m) {
-    return 'День $n из $m';
-  }
-
-  @override
   String daysOffCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -78,18 +68,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String inDuration(String duration) {
     return 'через $duration';
   }
-
-  @override
-  String get boxDays => 'дн';
-
-  @override
-  String get boxHours => 'ч';
-
-  @override
-  String get boxMinutes => 'мин';
-
-  @override
-  String get boxSeconds => 'сек';
 
   @override
   String get dayShort => 'д';
@@ -111,12 +89,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get kindDaysOff => 'Отдых';
-
-  @override
-  String get nextWeekend => 'Ближайшие выходные';
-
-  @override
-  String get nextHoliday => 'Ближайший праздник';
 
   @override
   String get noneComing => 'Не будет в ближайший год';
@@ -145,13 +117,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get openCalendar => 'Открыть календарь';
 
   @override
-  String get pickCountryBanner =>
-      'Выберите страну, чтобы учитывать государственные праздники.';
-
-  @override
-  String get chooseCountry => 'Выбрать страну';
-
-  @override
   String holidaysNotLoaded(String years) {
     return 'Не удалось загрузить праздники за $years. Выходные всё равно учитываются.';
   }
@@ -170,12 +135,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get legendWorkday => 'Рабочий (перенос)';
-
-  @override
-  String get holidaysThisMonth => 'Праздники в этом месяце';
-
-  @override
-  String get noHolidaysThisMonth => 'В этом месяце нет праздников';
 
   @override
   String get calendarHint =>
@@ -307,6 +266,313 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get dataSource => 'Праздники: Nager.Date (date.nager.at)';
+
+  @override
+  String weekdayName(String day) {
+    String _temp0 = intl.Intl.selectLogic(day, {
+      '1': 'понедельника',
+      '2': 'вторника',
+      '3': 'среды',
+      '4': 'четверга',
+      '5': 'пятницы',
+      '6': 'субботы',
+      '7': 'воскресенья',
+      'other': 'пятницы',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String monthIn(String month) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      '1': 'в январе',
+      '2': 'в феврале',
+      '3': 'в марте',
+      '4': 'в апреле',
+      '5': 'в мае',
+      '6': 'в июне',
+      '7': 'в июле',
+      '8': 'в августе',
+      '9': 'в сентябре',
+      '10': 'в октябре',
+      '11': 'в ноябре',
+      '12': 'в декабре',
+      'other': 'в этом месяце',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String durationDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count дня',
+      many: '$count дней',
+      few: '$count дня',
+      one: '$count день',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count часа',
+      many: '$count часов',
+      few: '$count часа',
+      one: '$count час',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationMinutes(int count) {
+    return '$count мин';
+  }
+
+  @override
+  String durationSeconds(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count секунды',
+      many: '$count секунд',
+      few: '$count секунды',
+      one: '$count секунда',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get timerDay => 'д';
+
+  @override
+  String get timerHour => 'ч';
+
+  @override
+  String get timerMinute => 'м';
+
+  @override
+  String get whenToday => 'сегодня';
+
+  @override
+  String get whenTomorrow => 'завтра';
+
+  @override
+  String whenAt(String day, String time) {
+    return '$day, $time';
+  }
+
+  @override
+  String get eyebrowUntil => 'до';
+
+  @override
+  String get eyebrowFreedom => 'свободы';
+
+  @override
+  String get eyebrowLastHourPrefix => 'до свободы';
+
+  @override
+  String get eyebrowLastHourStrike => 'вечность';
+
+  @override
+  String get eyebrowLastHourSuffix => 'меньше часа';
+
+  @override
+  String get eyebrowOffStrike => 'до работы';
+
+  @override
+  String get eyebrowWeekendLeft => 'выходные ещё';
+
+  @override
+  String get eyebrowLongWeekendLeft => 'длинные выходные ещё';
+
+  @override
+  String get eyebrowHolidayStrike => 'рабочий день';
+
+  @override
+  String get eyebrowHolidayLeft => 'праздник';
+
+  @override
+  String get eyebrowDaysOffStrike => 'работа';
+
+  @override
+  String get eyebrowDaysOffLeft => 'отдыхаем ещё';
+
+  @override
+  String weekDone(int percent) {
+    return '$percent% недели позади';
+  }
+
+  @override
+  String get backToWorkLower => 'снова на работу';
+
+  @override
+  String get orbTip => 'нажмите на шар, чтобы сменить фразу';
+
+  @override
+  String orbLabel(int percent) {
+    return '$percent% позади. Нажмите, чтобы сменить фразу';
+  }
+
+  @override
+  String get jokesLabel => 'Фразы недели';
+
+  @override
+  String get jokesMore => 'Другие фразы';
+
+  @override
+  String get hintCountryTitle => 'Учитывать праздники';
+
+  @override
+  String get hintCountryBody => 'Выберите страну, и праздники сократят неделю';
+
+  @override
+  String get hintHolidaysFailedTitle => 'Праздники не загружены';
+
+  @override
+  String weekendLonger(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Выходные длиннее на $count дня',
+      many: 'Выходные длиннее на $count дней',
+      few: 'Выходные длиннее на $count дня',
+      one: 'Выходные длиннее на $count день',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get aheadLongWeekend => 'Впереди длинные выходные';
+
+  @override
+  String get aheadHoliday => 'Впереди праздник';
+
+  @override
+  String get aheadDaysOff => 'Впереди отдых';
+
+  @override
+  String get widgetTipTitle => 'Таймер на главном экране';
+
+  @override
+  String get widgetTipBody => 'Добавьте виджет за полминуты';
+
+  @override
+  String get widgetsTitle => 'Виджеты';
+
+  @override
+  String get widgetStepIos1 =>
+      'Нажмите и подержите пустое место на экране «Домой»';
+
+  @override
+  String get widgetStepIos2 => 'Нажмите «Править», затем «Добавить виджет»';
+
+  @override
+  String get widgetStepIos3 => 'Найдите «Счётчик выходных» и выберите размер';
+
+  @override
+  String get widgetStepAndroid1 =>
+      'Удерживайте палец на пустом месте главного экрана';
+
+  @override
+  String get widgetStepAndroid2 => 'Откройте «Виджеты»';
+
+  @override
+  String get widgetStepAndroid3 =>
+      'Найдите «Счётчик выходных» и перетащите на экран';
+
+  @override
+  String get widgetUpdatesNote =>
+      'Цифры обновляются сами, даже когда приложение закрыто.';
+
+  @override
+  String get gotIt => 'Понятно';
+
+  @override
+  String get done => 'Готово';
+
+  @override
+  String get close => 'Закрыть';
+
+  @override
+  String get back => 'Назад';
+
+  @override
+  String get today => 'Сегодня';
+
+  @override
+  String daysOffIn(String monthIn) {
+    return 'Свободных дней $monthIn';
+  }
+
+  @override
+  String holidayOn(String date) {
+    return 'праздник $date';
+  }
+
+  @override
+  String get noHolidaysShort => 'без праздников';
+
+  @override
+  String get upcomingHolidays => 'Ближайшие праздники';
+
+  @override
+  String get noUpcomingHolidays => 'Выберите страну, чтобы видеть праздники';
+
+  @override
+  String get settingsSubtitle =>
+      'Сохраняем сразу. Таймер и виджет пересчитаются сами.';
+
+  @override
+  String get workdaysHint =>
+      'Нажмите на день, чтобы сделать его рабочим или выходным';
+
+  @override
+  String get shiftStartsAt => 'Начало';
+
+  @override
+  String get shiftEndsAt => 'Конец';
+
+  @override
+  String get celebrateWeekend => 'Выходные!';
+
+  @override
+  String get celebrateLongWeekend => 'Длинные выходные!';
+
+  @override
+  String get celebrateHoliday => 'Праздник!';
+
+  @override
+  String get celebrateDaysOff => 'Отдых!';
+
+  @override
+  String get celebrateEyebrow => 'неделя позади';
+
+  @override
+  String get celebrateLateEyebrow => 'с опозданием, но от души';
+
+  @override
+  String get celebrateWas => 'работа';
+
+  @override
+  String celebrateBody(String duration) {
+    return 'Работа закончилась. Впереди $duration без работы.';
+  }
+
+  @override
+  String get celebrateBodyOpen => 'Работа закончилась. Отдыхайте.';
+
+  @override
+  String celebrateLateBody(String when) {
+    return 'Неделя закончилась $when. Празднуем всё равно.';
+  }
+
+  @override
+  String get celebrateCta => 'Ура, отдыхаю';
 
   @override
   String get widgetSetUp => 'Откройте приложение для настройки';

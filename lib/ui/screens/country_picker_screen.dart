@@ -1,8 +1,14 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../models/holiday.dart';
 import '../../state/app_controller.dart';
+import '../kit/app_page.dart';
+import '../kit/buttons.dart';
+import '../kit/glass.dart';
+import '../kit/group.dart';
+import '../theme/tokens.dart';
 
 /// Flag emoji for an ISO 3166-1 alpha-2 code.
 String countryFlag(String code) => String.fromCharCodes(
@@ -50,69 +56,94 @@ class _CountryPickerScreenState extends State<CountryPickerScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final t = context.tokens;
     final current = widget.controller.settings.countryCode;
     return Scaffold(
-      appBar: AppBar(
-        title: TextField(
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: l10n.searchCountry,
-            border: InputBorder.none,
-          ),
-          onChanged: (value) => setState(() => _query = value.toLowerCase()),
-        ),
-      ),
+      backgroundColor: t.bg,
       body: FutureBuilder<List<Country>>(
         future: _countries,
         builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(l10n.loadFailed),
-                  const SizedBox(height: 12),
-                  FilledButton.tonal(
-                    onPressed: () => setState(
-                      () => _countries = widget.controller.loadCountries(),
-                    ),
-                    child: Text(l10n.retry),
-                  ),
-                ],
-              ),
-            );
-          }
           final countries = snapshot.data;
-          if (countries == null) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final matches = countries.where(
+          final matches = (countries ?? const <Country>[]).where(
             (c) =>
                 _query.isEmpty ||
                 c.name.toLowerCase().contains(_query) ||
                 c.code.toLowerCase() == _query,
           );
-          return ListView(
+          return AppPage(
+            title: l10n.country,
+            bottomPadding: MediaQuery.paddingOf(context).bottom + 24,
+            leading: GlassButton(
+              icon: Icons.arrow_back_ios_new_rounded,
+              label: l10n.back,
+              onTap: () => Navigator.of(context).pop(),
+            ),
             children: [
-              if (_query.isEmpty)
-                ListTile(
-                  leading: const Icon(Icons.block),
-                  title: Text(l10n.noCountryOption),
-                  trailing: current == null ? const Icon(Icons.check) : null,
-                  onTap: () => _select(null),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                child: CupertinoSearchTextField(
+                  autofocus: true,
+                  placeholder: l10n.searchCountry,
+                  style: t.body,
+                  backgroundColor: t.surface2,
+                  borderRadius: BorderRadius.circular(12),
+                  onChanged: (value) =>
+                      setState(() => _query = value.trim().toLowerCase()),
                 ),
-              for (final country in matches)
-                ListTile(
-                  leading: Text(
-                    countryFlag(country.code),
-                    style: const TextStyle(fontSize: 24),
+              ),
+              if (snapshot.hasError)
+                Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    children: [
+                      Text(
+                        l10n.loadFailed,
+                        textAlign: TextAlign.center,
+                        style: t.callout,
+                      ),
+                      const SizedBox(height: 16),
+                      AppButton(
+                        label: l10n.retry,
+                        kind: ButtonKind.secondary,
+                        expand: false,
+                        onTap: () => setState(
+                          () => _countries = widget.controller.loadCountries(),
+                        ),
+                      ),
+                    ],
                   ),
-                  title: Text(country.name),
-                  subtitle: Text(country.code),
-                  trailing: country.code == current
-                      ? const Icon(Icons.check)
-                      : null,
-                  onTap: () => _select(country.code),
+                )
+              else if (countries == null)
+                const Padding(
+                  padding: EdgeInsets.all(32),
+                  child: CupertinoActivityIndicator(),
+                )
+              else
+                Group(
+                  children: [
+                    if (_query.isEmpty)
+                      GroupRow(
+                        icon: Icons.block_rounded,
+                        title: l10n.noCountryOption,
+                        selected: current == null,
+                        onTap: () => _select(null),
+                      ),
+                    for (final country in matches)
+                      GroupRow(
+                        leading: SizedBox(
+                          width: 28,
+                          child: Text(
+                            countryFlag(country.code),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 22),
+                          ),
+                        ),
+                        title: country.name,
+                        subtitle: country.code,
+                        selected: country.code == current,
+                        onTap: () => _select(country.code),
+                      ),
+                  ],
                 ),
             ],
           );

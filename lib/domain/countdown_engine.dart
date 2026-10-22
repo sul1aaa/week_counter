@@ -89,14 +89,22 @@ final class CountingDown extends CountdownState {
   const CountingDown({
     required this.target,
     required this.block,
+    this.since,
     this.inShiftUntil,
   });
 
   final DateTime target;
   final OffBlock block;
 
+  /// Start of the first shift of the current run of workdays. Null if the
+  /// run started before the look-back window.
+  final DateTime? since;
+
   /// End of the shift happening right now, if any.
   final DateTime? inShiftUntil;
+
+  /// How much of the run of workdays is done, from 0 to 1.
+  double progress(DateTime now) => _fraction(since, target, now);
 }
 
 /// Currently off work, counting down to [backToWork].
@@ -111,6 +119,16 @@ final class OffNow extends CountdownState {
   /// 1-based index of today within [block]; null on the evening before the
   /// block's first day.
   final int? dayNumber;
+
+  /// How much of the time off is over, from 0 to 1.
+  double progress(DateTime now) => _fraction(block.offStart, backToWork, now);
+}
+
+double _fraction(DateTime? from, DateTime? to, DateTime now) {
+  if (from == null || to == null || !to.isAfter(from)) return 0;
+  final done =
+      now.difference(from).inMilliseconds / to.difference(from).inMilliseconds;
+  return done.clamp(0.0, 1.0);
 }
 
 /// The schedule has no workdays, so there is nothing to count down to.
@@ -212,6 +230,18 @@ class CountdownEngine {
     return result;
   }
 
+  /// Start of the first shift in the run of workdays that ends the day
+  /// before [offDay], or null if the run is longer than the look-back window.
+  DateTime? workRunStart(CalendarDate offDay) {
+    var date = offDay.addDays(-1);
+    for (var i = 0; i < lookbackDays; i++) {
+      final previous = date.addDays(-1);
+      if (_day(previous).isOff) return schedule.shiftStartOn(date);
+      date = previous;
+    }
+    return null;
+  }
+
   /// End of the shift in progress at [now], or null between shifts.
   DateTime? currentShiftEnd(DateTime now) {
     final today = CalendarDate.fromDateTime(now);
@@ -272,6 +302,7 @@ class CountdownEngine {
       state = CountingDown(
         target: current.offStart!,
         block: current,
+        since: workRunStart(current.first),
         inShiftUntil: inShift,
       );
       until(current.offStart);
