@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import '../core/calendar_date.dart';
 import '../domain/awards.dart';
@@ -29,13 +29,13 @@ class AppController extends ChangeNotifier {
     required this.widgetSync,
     PrefsRepository? prefsRepository,
     this.clock = DateTime.now,
-    Locale Function()? deviceLocale,
+    List<Locale> Function()? deviceLocales,
   }) : _settingsRepository = settingsRepository,
        _holidayRepository = holidayRepository,
        _prefsRepository =
            prefsRepository ?? PrefsRepository(InMemoryLocalStore()),
-       _deviceLocale =
-           deviceLocale ?? (() => PlatformDispatcher.instance.locale);
+       _deviceLocales =
+           deviceLocales ?? (() => PlatformDispatcher.instance.locales);
 
   /// How long after time off starts it is still worth celebrating.
   static const celebrateWithin = Duration(days: 2);
@@ -45,7 +45,9 @@ class AppController extends ChangeNotifier {
   final PrefsRepository _prefsRepository;
   final WidgetSync widgetSync;
   final Clock clock;
-  final Locale Function() _deviceLocale;
+
+  /// The phone's languages, most preferred first.
+  final List<Locale> Function() _deviceLocales;
 
   AppSettings _settings = const AppSettings();
   UiPrefs _prefs = const UiPrefs();
@@ -182,7 +184,7 @@ class AppController extends ChangeNotifier {
     if (saved == null) {
       // First launch: guess the country from the phone's region.
       _settings = AppSettings(
-        countryCode: _deviceLocale().countryCode?.toUpperCase(),
+        countryCode: _deviceLocales().firstOrNull?.countryCode?.toUpperCase(),
       );
       await _settingsRepository.save(_settings);
     } else {
@@ -379,8 +381,13 @@ class AppController extends ChangeNotifier {
   }
 
   Future<void> _pushWidget() {
-    final language = _deviceLocale().languageCode == 'ru' ? 'ru' : 'en';
-    final l10n = lookupAppLocalizations(Locale(language));
+    // Picked the way MaterialApp picks the app's language, so the two match
+    // even when the first language isn't translated (Kazakh, then Russian).
+    final locale = basicLocaleListResolution(
+      _deviceLocales(),
+      AppLocalizations.supportedLocales,
+    );
+    final l10n = lookupAppLocalizations(locale);
     return widgetSync.push(buildWidgetPayload(_snapshot, l10n));
   }
 }

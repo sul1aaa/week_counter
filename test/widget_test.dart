@@ -22,7 +22,10 @@ void main() {
 
   setUp(() => now = DateTime(2026, 10, 21, 12));
 
-  Future<AppController> createController({bool onboarded = true}) async {
+  Future<AppController> createController({
+    bool onboarded = true,
+    List<Locale> Function()? deviceLocales,
+  }) async {
     final store = InMemoryLocalStore();
     widgetSync = NoopWidgetSync();
     final controller = AppController(
@@ -34,7 +37,7 @@ void main() {
       prefsRepository: PrefsRepository(store),
       widgetSync: widgetSync,
       clock: () => now,
-      deviceLocale: () => const Locale('ru', 'RU'),
+      deviceLocales: deviceLocales ?? () => const [Locale('ru', 'RU')],
     );
     await controller.init();
     if (onboarded) await controller.completeOnboarding();
@@ -104,6 +107,23 @@ void main() {
     final payload = widgetSync.lastPayload!;
     expect(payload.locale, 'ru');
     expect(payload.segments.first.title, 'До выходных');
+  });
+
+  testWidgets('the app and the widget pick the same language', (tester) async {
+    reduceMotion(tester);
+    tester.platformDispatcher.localesTestValue = const [
+      Locale('uk', 'UA'),
+      Locale('ru', 'RU'),
+    ];
+    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+    final controller = await createController(
+      deviceLocales: () => tester.platformDispatcher.locales,
+    );
+    await tester.pumpWidget(WeekCounterApp(controller: controller));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ср, 21 октября'), findsOneWidget);
+    expect(widgetSync.lastPayload!.locale, 'ru');
   });
 
   testWidgets('unchecking every workday shows the empty state', (tester) async {
