@@ -59,6 +59,35 @@ void main() {
     expect(c.prefs.earned.keys, containsAll(['w1', 'w4', 'shortWeek']));
   });
 
+  test(
+    'a holiday on the Monday after the weekend makes a short week',
+    () async {
+      now = DateTime(2027, 3, 3, 12); // Wednesday
+      await (await create()).refreshHolidays();
+      // Women's Day on Monday 8 March: the weekend starts Friday as usual
+      // and runs to Tuesday morning.
+      now = DateTime(2027, 3, 8, 12);
+      final c = await create();
+      expect(c.prefs.weeks, 1);
+      expect(c.prefs.earned.keys, contains('shortWeek'));
+    },
+  );
+
+  test('a week that ends at midnight on Friday the 13th counts', () async {
+    now = DateTime(2026, 11, 11, 12); // Wednesday
+    final c = await create();
+    await c.updateSchedule(
+      WorkSchedule.standard.copyWith(
+        defaultShift: const Shift(ShiftTime(16, 0), ShiftTime(0, 0)),
+      ),
+    );
+    // The last shift of the week runs Friday 13 November 16:00–24:00.
+    now = DateTime(2026, 11, 14, 12);
+    c.recompute();
+    expect(c.prefs.weeks, 1);
+    expect(c.prefs.earned.keys, contains('friday13'));
+  });
+
   test('editing the schedule mid-week neither counts nor celebrates', () async {
     final c = await create();
     now = DateTime(2026, 10, 23, 12); // Friday noon

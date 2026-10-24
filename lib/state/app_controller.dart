@@ -353,12 +353,20 @@ class AppController extends ChangeNotifier {
       for (final award in awards) {
         if (award.weeks == weeks) give(award.id, start);
       }
-      if (start.weekday == DateTime.friday && start.day == 13) {
+      // The day the week ended, even if its last shift ran past midnight.
+      if (lastWorkday.weekday == DateTime.friday && lastWorkday.day == 13) {
         give('friday13', start);
       }
-      final firstOff = classify(lastWorkday.addDays(1));
-      if (firstOff.isScheduledWorkday &&
-          firstOff.reasons.contains(OffReason.publicHoliday)) {
+      // A holiday on a workday anywhere in the time off, such as the
+      // Monday after the weekend. Two weeks covers the longest holidays.
+      final daysOff = [
+        for (var i = 1; i <= 14; i++) classify(lastWorkday.addDays(i)),
+      ].takeWhile((day) => day.isOff);
+      if (daysOff.any(
+        (day) =>
+            day.isScheduledWorkday &&
+            day.reasons.contains(OffReason.publicHoliday),
+      )) {
         give('shortWeek', start);
       }
       if (_settings.schedule.shiftFor(lastWorkday.weekday).isOvernight) {
