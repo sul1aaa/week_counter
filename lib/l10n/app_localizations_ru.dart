@@ -90,7 +90,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get noWorkdaysBody =>
-      'Выберите рабочие дни в настройках, чтобы начать отсчёт.';
+      'Выберите рабочие дни в «Графике», чтобы начать отсчёт.';
 
   @override
   String get noDaysOffTitle => 'Выходных не предвидится';
@@ -100,7 +100,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Весь следующий год — рабочие дни. Отметьте выходные в календаре.';
 
   @override
-  String get openSettings => 'Открыть настройки';
+  String get openSettings => 'Открыть график';
 
   @override
   String get openCalendar => 'Открыть календарь';

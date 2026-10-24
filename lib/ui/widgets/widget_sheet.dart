@@ -150,9 +150,12 @@ class WidgetPreview extends StatelessWidget {
         OrbMode.work,
       ),
       OffNow(:final backToWork, :final block) && final s => (
-        block.kind == BlockKind.longWeekend
-            ? l10n.eyebrowLongWeekendLeft
-            : l10n.eyebrowWeekendLeft,
+        switch (block.kind) {
+          BlockKind.weekend => l10n.eyebrowWeekendLeft,
+          BlockKind.longWeekend => l10n.eyebrowLongWeekendLeft,
+          BlockKind.holiday ||
+          BlockKind.daysOff => l10n.backToWorkIn.toLowerCase(),
+        },
         backToWork,
         1 - s.progress(now),
         OrbMode.weekend,

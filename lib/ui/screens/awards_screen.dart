@@ -24,7 +24,9 @@ class AwardsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final t = context.tokens;
-    final width = MediaQuery.sizeOf(context).width;
+    final heroSize = (MediaQuery.sizeOf(context).width * 0.26)
+        .clamp(72, 112)
+        .toDouble();
     return ListenableBuilder(
       listenable: controller,
       builder: (context, _) {
@@ -46,10 +48,10 @@ class AwardsScreen extends StatelessWidget {
                       '${prefs.weeks}',
                       style: TextStyle(
                         fontFamily: Fonts.display,
-                        fontSize: (width * 0.26).clamp(72, 112).toDouble(),
+                        fontSize: heroSize,
                         height: 0.85,
                         fontWeight: FontWeight.w700,
-                        letterSpacing: -0.06 * 112,
+                        letterSpacing: -0.06 * heroSize,
                         fontFeatures: Fonts.tabular,
                         color: t.ink,
                       ),

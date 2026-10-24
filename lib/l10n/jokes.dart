@@ -20,6 +20,7 @@ enum JokePool {
   weekend,
   sunEvening,
   preWork,
+  midweekHoliday,
   holiday,
   daysOff,
   work,
@@ -88,8 +89,8 @@ const _en = <JokePool, List<String>>{
     'A bit more freedom. Work ~~is waiting~~ can wait.',
     'The weekend is ending, but not right now.',
   ],
+  JokePool.midweekHoliday: ['A holiday mid-week is like two little Fridays.'],
   JokePool.holiday: [
-    'A holiday mid-week is like two little Fridays.',
     '{holiday}. The calendar is on your side today.',
     '{holiday}. Work is ~~postponed~~ cancelled for a good reason.',
   ],
@@ -170,8 +171,10 @@ const _ru = <JokePool, List<String>>{
     'Ещё немного свободы. Работа ~~ждёт~~ подождёт.',
     'Выходные заканчиваются, но не прямо сейчас.',
   ],
-  JokePool.holiday: [
+  JokePool.midweekHoliday: [
     'Праздник посреди недели — как две маленькие пятницы.',
+  ],
+  JokePool.holiday: [
     '{holiday}. Календарь сегодня на вашей стороне.',
     '{holiday}. Работа ~~переносится~~ отменяется по уважительной причине.',
   ],
@@ -206,7 +209,12 @@ List<JokePool> jokePools(
   switch (state) {
     case OffNow(:final block, :final backToWork):
       if (block.kind == BlockKind.daysOff) return [JokePool.daysOff];
-      if (block.kind == BlockKind.holiday) return [JokePool.holiday];
+      if (block.kind == BlockKind.holiday) {
+        // Holidays that take in a weekend aren't mid-week.
+        return block.hasScheduledOff
+            ? [JokePool.holiday, JokePool.daysOff]
+            : [JokePool.midweekHoliday, JokePool.holiday];
+      }
       if (five && now.weekday == DateTime.sunday && now.hour >= 16) {
         return [JokePool.sunEvening];
       }

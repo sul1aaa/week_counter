@@ -240,7 +240,11 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: Icons.celebration_rounded,
           tone: InlineTone.lime,
           title: l10n.blockDetails(block) ?? l10n.kindLabel(block.kind),
-          subtitle: l10n.holidayMidweek(l10n.when(backToWork, now)),
+          // Holidays that take in a weekend, like the New Year ones, aren't
+          // mid-week.
+          subtitle: block.hasScheduledOff
+              ? l10n.backToWorkAt(l10n.when(backToWork, now))
+              : l10n.holidayMidweek(l10n.when(backToWork, now)),
         );
       case OffNow(:final block) when block.kind == BlockKind.longWeekend:
         final extra = block.days.where((d) => d.isExtraOff).toList();

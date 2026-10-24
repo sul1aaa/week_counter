@@ -29,10 +29,10 @@
 
   "noneComing": "None in the next year",
   "noWorkdaysTitle": "No workdays set",
-  "noWorkdaysBody": "Choose your workdays in Settings to start the countdown.",
+  "noWorkdaysBody": "Choose your workdays in Schedule to start the countdown.",
   "noDaysOffTitle": "No days off ahead",
   "noDaysOffBody": "Every day in the next year is a workday. Mark days off in the calendar.",
-  "openSettings": "Open settings",
+  "openSettings": "Open schedule",
   "openCalendar": "Open calendar",
   "holidaysNotLoaded": "Couldn't load public holidays for {years}. Weekends are still counted.",
   "@holidaysNotLoaded": {"placeholders": {"years": {"type": "String"}}},

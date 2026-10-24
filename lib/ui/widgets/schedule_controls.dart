@@ -18,6 +18,18 @@ List<int> orderedWeekdays(BuildContext context) {
   return [for (var i = 0; i < 7; i++) (first - 1 + i) % 7 + 1];
 }
 
+/// [workdays] in the order of [weekdays], starting on the day a run of
+/// workdays begins: Sun–Thu stays Sun–Thu in a week that starts on Monday.
+List<int> workWeek(Set<int> workdays, List<int> weekdays) {
+  final days = [
+    for (final day in weekdays)
+      if (workdays.contains(day)) day,
+  ];
+  // (d + 5) % 7 + 1 is the day before d: Sunday for Monday.
+  final first = days.indexWhere((d) => !workdays.contains((d + 5) % 7 + 1));
+  return first <= 0 ? days : [...days.skip(first), ...days.take(first)];
+}
+
 String capitalized(String text) =>
     text.isEmpty ? text : '${text[0].toUpperCase()}${text.substring(1)}';
 
@@ -44,7 +56,12 @@ class DaysPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final t = context.tokens;
-    bool works(int i) => i >= 0 && i < 7 && workdays.contains(weekdays[i]);
+    bool works(int i) => workdays.contains(weekdays[i % 7]);
+    // Runs wrap around the week, so Sun–Thu has its ends on Sunday and
+    // Thursday. Seven workdays have no ends; the row's ends stand in.
+    bool runEnd(int i) => workdays.length == 7
+        ? i == 0 || i == 6
+        : !works(i + 6) || !works(i + 1);
     return Row(
       children: [
         for (final (i, day) in weekdays.indexed) ...[
@@ -67,9 +84,9 @@ class DaysPicker extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: !works(i)
                           ? t.surface
-                          : works(i - 1) && works(i + 1)
-                          ? t.violetSoft
-                          : t.inverse,
+                          : runEnd(i)
+                          ? t.inverse
+                          : t.violetSoft,
                     ),
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
@@ -81,9 +98,9 @@ class DaysPicker extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           color: !works(i)
                               ? t.ink
-                              : works(i - 1) && works(i + 1)
-                              ? t.violetInk
-                              : t.onInverse,
+                              : runEnd(i)
+                              ? t.onInverse
+                              : t.violetInk,
                         ),
                       ),
                     ),
@@ -107,10 +124,7 @@ List<Widget> weekTimeRows(
 }) {
   final l10n = AppLocalizations.of(context);
   final schedule = controller.settings.schedule;
-  final days = [
-    for (final d in orderedWeekdays(context))
-      if (schedule.workdays.contains(d)) d,
-  ];
+  final days = workWeek(schedule.workdays, orderedWeekdays(context));
   String format(ShiftTime t) =>
       l10n.time(DateTime(2000, 1, 1, t.hour, t.minute));
   final shift = schedule.defaultShift;
