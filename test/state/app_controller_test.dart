@@ -31,7 +31,7 @@ void main() {
       prefsRepository: PrefsRepository(store),
       widgetSync: NoopWidgetSync(),
       clock: () => now,
-      deviceLocale: () => const Locale('ru', 'RU'),
+      deviceLocales: () => const [Locale('ru', 'RU')],
     );
     await controller.init();
     return controller;
@@ -47,6 +47,25 @@ void main() {
     expect(c.prefs.onboarded, isFalse);
     expect(c.prefs.weeks, 0);
     expect(c.celebrationDue, isNull);
+  });
+
+  test('the widget falls back to the next language, like the app', () async {
+    final widgetSync = NoopWidgetSync();
+    final c = AppController(
+      settingsRepository: SettingsRepository(store),
+      holidayRepository: HolidayRepository(
+        store,
+        NagerDateApi(client: FakeNager().client),
+      ),
+      widgetSync: widgetSync,
+      clock: () => now,
+      // There's no Kazakh translation, so the app shows Russian.
+      deviceLocales: () => const [Locale('kk', 'KZ'), Locale('ru', 'RU')],
+    );
+    await c.init();
+    expect(c.settings.countryCode, 'KZ');
+    expect(widgetSync.lastPayload!.locale, 'ru');
+    expect(widgetSync.lastPayload!.segments.first.title, 'До выходных');
   });
 
   test('counts weekends while the app was closed', () async {
