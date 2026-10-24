@@ -118,7 +118,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('No workdays set'), findsOneWidget);
-    await tester.tap(find.text('Open settings'));
+    await tester.tap(find.text('Open schedule'));
     await tester.pumpAndSettle();
     expect(find.text('Week starts'), findsOneWidget);
   });

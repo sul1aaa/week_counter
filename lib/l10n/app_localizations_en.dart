@@ -88,7 +88,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noWorkdaysBody =>
-      'Choose your workdays in Settings to start the countdown.';
+      'Choose your workdays in Schedule to start the countdown.';
 
   @override
   String get noDaysOffTitle => 'No days off ahead';
@@ -98,7 +98,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Every day in the next year is a workday. Mark days off in the calendar.';
 
   @override
-  String get openSettings => 'Open settings';
+  String get openSettings => 'Open schedule';
 
   @override
   String get openCalendar => 'Open calendar';

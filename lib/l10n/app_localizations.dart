@@ -233,7 +233,7 @@ abstract class AppLocalizations {
   /// No description provided for @noWorkdaysBody.
   ///
   /// In en, this message translates to:
-  /// **'Choose your workdays in Settings to start the countdown.'**
+  /// **'Choose your workdays in Schedule to start the countdown.'**
   String get noWorkdaysBody;
 
   /// No description provided for @noDaysOffTitle.
@@ -251,7 +251,7 @@ abstract class AppLocalizations {
   /// No description provided for @openSettings.
   ///
   /// In en, this message translates to:
-  /// **'Open settings'**
+  /// **'Open schedule'**
   String get openSettings;
 
   /// No description provided for @openCalendar.
