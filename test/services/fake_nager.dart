@@ -28,6 +28,14 @@ class FakeNager {
         'global': true,
         'types': ['Public'],
       },
+      {
+        'date': '2027-03-08',
+        'localName': 'Международный женский день',
+        'name': "International Women's Day",
+        'countryCode': 'RU',
+        'global': true,
+        'types': ['Public'],
+      },
     ],
   };
 
