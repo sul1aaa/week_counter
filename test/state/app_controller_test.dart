@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:week_counter/core/calendar_date.dart';
 import 'package:week_counter/domain/countdown_engine.dart';
+import 'package:week_counter/models/app_settings.dart';
 import 'package:week_counter/models/work_schedule.dart';
 import 'package:week_counter/services/holiday_api.dart';
 import 'package:week_counter/services/holiday_repository.dart';
@@ -87,5 +88,41 @@ void main() {
 
     await c.cancelVacation();
     expect(c.vacation, isNull);
+  });
+
+  test('marking days off keeps the notes and vacation already there', () async {
+    final c = await create();
+    await c.planVacation(const CalendarDate(2026, 10, 26), 14, 'Отпуск');
+    const dentist = CalendarDate(2026, 11, 10);
+    await c.setOverride([
+      dentist,
+    ], const DayOverride(OverrideKind.dayOff, note: 'Dentist'));
+
+    await c.markDaysOff([
+      for (var day = 7; day <= 11; day++) CalendarDate(2026, 11, day),
+    ]);
+
+    expect(c.vacation, (
+      first: const CalendarDate(2026, 10, 26),
+      last: const CalendarDate(2026, 11, 8),
+    ));
+    expect(c.settings.overrides[dentist]!.note, 'Dentist');
+    expect(
+      c.settings.overrides[const CalendarDate(2026, 11, 9)]!.kind,
+      OverrideKind.dayOff,
+    );
+    expect(
+      c.settings.overrides[const CalendarDate(2026, 11, 11)]!.kind,
+      OverrideKind.dayOff,
+    );
+
+    // The whole vacation is still one, so cancelling clears all of it.
+    await c.cancelVacation();
+    expect(c.vacation, isNull);
+    expect(c.settings.overrides.keys, {
+      const CalendarDate(2026, 11, 9),
+      dentist,
+      const CalendarDate(2026, 11, 11),
+    });
   });
 }

@@ -6,7 +6,6 @@ import '../../domain/countdown_engine.dart';
 import '../../domain/day_classifier.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/labels.dart';
-import '../../models/app_settings.dart';
 import '../../state/app_controller.dart';
 import '../kit/app_page.dart';
 import '../kit/buttons.dart';
@@ -53,10 +52,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
     _rangeEnd = null;
   });
 
-  Future<void> _applyToRange(DayOverride? value) async {
+  Future<void> _applyToRange(
+    Future<void> Function(List<CalendarDate> dates) apply,
+  ) async {
     final dates = _selectedDates;
     _clearRange();
-    await _controller.setOverride(dates, value);
+    await apply(dates);
   }
 
   void _onTap(CalendarDate date) {
@@ -166,9 +167,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 child: _RangeBar(
                   count: selected.length,
                   onCancel: _clearRange,
-                  onReset: () => _applyToRange(null),
-                  onMarkOff: () =>
-                      _applyToRange(const DayOverride(OverrideKind.dayOff)),
+                  onReset: () => _applyToRange(
+                    (dates) => _controller.setOverride(dates, null),
+                  ),
+                  onMarkOff: () => _applyToRange(_controller.markDaysOff),
                 ),
               ),
           ],

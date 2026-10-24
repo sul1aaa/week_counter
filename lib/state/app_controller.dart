@@ -284,6 +284,13 @@ class AppController extends ChangeNotifier {
     return _update(_settings.copyWith(overrides: overrides));
   }
 
+  /// Marks [dates] as days off. Days that already are keep their notes and
+  /// stay part of their vacation.
+  Future<void> markDaysOff(Iterable<CalendarDate> dates) => setOverride([
+    for (final date in dates)
+      if (_settings.overrides[date]?.kind != OverrideKind.dayOff) date,
+  ], const DayOverride(OverrideKind.dayOff));
+
   /// Recomputes the countdown, e.g. when a shift ends or the day changes.
   void recompute() {
     _snapshot = _engine.snapshot(clock());
