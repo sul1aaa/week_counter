@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:week_counter/app.dart';
+import 'package:week_counter/core/calendar_date.dart';
 import 'package:week_counter/services/holiday_api.dart';
 import 'package:week_counter/services/holiday_repository.dart';
 import 'package:week_counter/services/local_store.dart';
@@ -173,5 +174,34 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
     expect(find.text('Yay, time to rest'), findsNothing);
+  });
+
+  testWidgets('saving a vacation day keeps it in the vacation', (tester) async {
+    reduceMotion(tester);
+    final controller = await createController();
+    await controller.planVacation(
+      const CalendarDate(2026, 10, 26),
+      14,
+      'Отпуск',
+    );
+    await tester.pumpWidget(
+      WeekCounterApp(controller: controller, locale: const Locale('en')),
+    );
+    await tester.pumpAndSettle();
+    await openTab(tester, 'calendar');
+
+    // October 28 is the first "28" on the calendar.
+    final day = find.text('28').first;
+    await tester.ensureVisible(day);
+    await tester.pumpAndSettle();
+    await tester.tap(day);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(controller.vacation, (
+      first: const CalendarDate(2026, 10, 26),
+      last: const CalendarDate(2026, 11, 8),
+    ));
   });
 }

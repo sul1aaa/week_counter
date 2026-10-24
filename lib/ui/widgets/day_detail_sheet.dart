@@ -57,13 +57,17 @@ class _DayDetailSheetState extends State<_DayDetailSheet> {
 
   void _save() {
     final note = _note.text.trim();
+    final vacation =
+        widget.controller.settings.overrides[widget.date]?.vacation ?? false;
     widget.controller.setOverride(
       [widget.date],
       switch (_choice) {
         _Choice.auto => null,
+        // A vacation day stays part of the vacation, or it would split in two.
         _Choice.dayOff => DayOverride(
           OverrideKind.dayOff,
           note: note.isEmpty ? null : note,
+          vacation: vacation,
         ),
         _Choice.workday => DayOverride(
           OverrideKind.workday,
