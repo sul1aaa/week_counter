@@ -4,4 +4,8 @@
     <string name="widget_name">Week Counter</string>
     <string name="widget_description">Countdown to your next weekend or holiday</string>
     <string name="widget_placeholder">Open the app to set up</string>
+    <!-- Sample countdown in the widget picker, matching the iOS widget's preview. -->
+    <string name="widget_preview_title">Weekend in</string>
+    <string name="widget_preview_counter">2d 3:20:00</string>
+    <string name="widget_preview_subtitle">Fri 18:00 · 2 days off</string>
 </resources>
