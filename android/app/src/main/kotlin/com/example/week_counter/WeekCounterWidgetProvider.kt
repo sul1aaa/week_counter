@@ -68,7 +68,10 @@ class WeekCounterWidgetProvider : HomeWidgetProvider() {
         super.onReceive(context, intent)
         when (intent.action) {
             // The Chronometer counts from elapsedRealtime, so a clock change needs a new base.
-            Intent.ACTION_TIME_CHANGED, Intent.ACTION_TIMEZONE_CHANGED -> {
+            Intent.ACTION_TIME_CHANGED, Intent.ACTION_TIMEZONE_CHANGED,
+            // Exact alarms were just allowed: swap "2d 3h" for the ticking timer now, not on
+            // the next refresh.
+            AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED -> {
                 val manager = AppWidgetManager.getInstance(context)
                 val ids = manager.getAppWidgetIds(ComponentName(context, javaClass))
                 onUpdate(context, manager, ids, HomeWidgetPlugin.getData(context))
