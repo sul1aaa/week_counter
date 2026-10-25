@@ -94,19 +94,18 @@ class WeekCounterWidgetProvider : HomeWidgetProvider() {
         if (live) {
             views.setViewVisibility(R.id.wc_coarse, View.GONE)
             views.setViewVisibility(R.id.wc_timer, View.VISIBLE)
-            views.setViewVisibility(R.id.wc_days, if (days > 0) View.VISIBLE else View.GONE)
-            views.setTextViewText(R.id.wc_days, "$days${strings.dayShort}")
             val untilDayTick = remaining - days * DAY_MS
+            // The days go in the timer's own text ("2d 3:20:15"), so the whole number is one
+            // view that can shrink to fit.
             views.setChronometer(
                 R.id.wc_timer,
                 SystemClock.elapsedRealtime() + untilDayTick,
-                null,
+                if (days > 0) "$days${strings.dayShort} %s" else null,
                 true,
             )
             views.setChronometerCountDown(R.id.wc_timer, true)
         } else {
             views.setViewVisibility(R.id.wc_timer, View.GONE)
-            views.setViewVisibility(R.id.wc_days, View.GONE)
             views.setViewVisibility(R.id.wc_coarse, View.VISIBLE)
             views.setTextViewText(R.id.wc_coarse, coarse(remaining, strings))
         }
