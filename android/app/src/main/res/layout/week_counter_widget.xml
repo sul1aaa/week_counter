@@ -19,44 +19,45 @@
         android:textSize="12sp"
         android:textStyle="bold" />
 
-    <LinearLayout
+    <!-- One line at a fixed height: the number shrinks to fit a narrow widget (Android 8+)
+         and doesn't grow past the line with a large system font. -->
+    <FrameLayout
         android:id="@+id/wc_counter"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:baselineAligned="true"
-        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
         android:visibility="gone">
-
-        <TextView
-            android:id="@+id/wc_days"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:fontFeatureSettings="tnum"
-            android:letterSpacing="-0.04"
-            android:textColor="@color/widget_text"
-            android:textSize="34sp"
-            android:textStyle="bold" />
 
         <Chronometer
             android:id="@+id/wc_timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:autoSizeMaxTextSize="34sp"
+            android:autoSizeMinTextSize="16sp"
+            android:autoSizeTextType="uniform"
+            android:ellipsize="end"
             android:fontFeatureSettings="tnum"
+            android:gravity="center_vertical"
             android:letterSpacing="-0.04"
+            android:maxLines="1"
             android:textColor="@color/widget_text"
             android:textSize="34sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/wc_coarse"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:autoSizeMaxTextSize="34sp"
+            android:autoSizeMinTextSize="16sp"
+            android:autoSizeTextType="uniform"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:maxLines="1"
             android:textColor="@color/widget_text"
             android:textSize="34sp"
             android:textStyle="bold"
             android:visibility="gone" />
-    </LinearLayout>
+    </FrameLayout>
 
     <TextView
         android:id="@+id/wc_subtitle"
