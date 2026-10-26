@@ -108,12 +108,19 @@ class _RootShellState extends State<RootShell> {
         backgroundColor: t.bg,
         body: Stack(
           children: [
-            IndexedStack(
-              index: _tab.index,
-              children: [
-                for (final (i, screen) in screens.indexed)
-                  TickerMode(enabled: i == _tab.index, child: screen),
-              ],
+            // Android's back button returns to Week before it closes the app.
+            PopScope(
+              canPop: _tab == AppTab.countdown,
+              onPopInvokedWithResult: (didPop, _) {
+                if (!didPop) _open(AppTab.countdown);
+              },
+              child: IndexedStack(
+                index: _tab.index,
+                children: [
+                  for (final (i, screen) in screens.indexed)
+                    TickerMode(enabled: i == _tab.index, child: screen),
+                ],
+              ),
             ),
             // Content fades out under the floating tab bar.
             Positioned(
