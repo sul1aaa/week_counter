@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -136,7 +137,14 @@ class _RootShellState extends State<RootShell> {
             Positioned(
               left: 0,
               right: 0,
-              bottom: bottom > 0 ? (bottom - 13).clamp(8, 48) : 12,
+              // iOS tucks the bar into the home indicator's inset. Android's
+              // navigation buttons and gesture handle live in that inset, so
+              // the bar sits above it.
+              bottom: bottom == 0
+                  ? 12
+                  : defaultTargetPlatform == TargetPlatform.android
+                  ? bottom + 8
+                  : (bottom - 13).clamp(8, 48),
               child: Center(
                 child: _TabBar(
                   selected: _tab,
