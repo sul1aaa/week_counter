@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:week_counter/app.dart';
@@ -90,6 +91,32 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Week starts'), findsOneWidget);
     expect(find.text('Vacation'), findsOneWidget);
+  });
+
+  testWidgets('the back button returns to Week from another tab', (
+    tester,
+  ) async {
+    reduceMotion(tester);
+    final controller = await createController();
+    await tester.pumpWidget(
+      WeekCounterApp(controller: controller, locale: const Locale('en')),
+    );
+    await tester.pumpAndSettle();
+    await openTab(tester, 'awards');
+    expect(find.text('First Friday'), findsOneWidget);
+
+    // What Android sends when the back button is pressed.
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.navigation.name,
+      SystemChannels.navigation.codec.encodeMethodCall(
+        const MethodCall('popRoute'),
+      ),
+      (_) {},
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('First Friday'), findsNothing);
+    expect(find.text('tap the orb for a new line'), findsOneWidget);
   });
 
   testWidgets('renders in Russian and feeds the widget', (tester) async {
