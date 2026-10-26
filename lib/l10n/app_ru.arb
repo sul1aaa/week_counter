@@ -148,6 +148,7 @@
   "sectionExtras": "Виджеты и эффекты",
   "confetti": "Конфетти",
   "confettiHint": "Если в iPhone включено «Уменьшение движения», покажем открытку без анимации",
+  "confettiHintAndroid": "Если в настройках телефона отключена анимация, покажем открытку без анимации",
   "weeksCount": "{count, plural, one{{count} неделя} few{{count} недели} many{{count} недель} other{{count} недели}}",
   "vacationTitle": "Отпуск",
   "vacationNone": "Нет",

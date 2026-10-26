@@ -553,6 +553,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Если в iPhone включено «Уменьшение движения», покажем открытку без анимации';
 
   @override
+  String get confettiHintAndroid =>
+      'Если в настройках телефона отключена анимация, покажем открытку без анимации';
+
+  @override
   String weeksCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
