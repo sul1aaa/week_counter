@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Design tokens from the «Выходные» prototype: Wabi neutrals with lime and
 /// violet accents, in light and dark.
@@ -113,6 +114,20 @@ class Tokens extends ThemeExtension<Tokens> {
   final Color widgetBg;
 
   bool get isDark => brightness == Brightness.dark;
+
+  /// Transparent status and navigation bars over [bg], as on iOS. Replaces
+  /// MaterialApp's default, which paints Android's navigation bar black.
+  /// Android 7 can't draw dark navigation buttons and keeps its black bar.
+  SystemUiOverlayStyle get systemBars {
+    final icons = isDark ? Brightness.light : Brightness.dark;
+    return SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarBrightness: brightness,
+      statusBarIconBrightness: icons,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness: icons,
+    );
+  }
 
   @override
   Tokens copyWith() => this;

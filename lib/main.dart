@@ -14,6 +14,10 @@ import 'state/app_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Draw under the system bars, as on iOS and on Android 15+.
+  if (defaultTargetPlatform == TargetPlatform.android) {
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  }
   LicenseRegistry.addLicense(_fontLicenses);
   // The widget text is formatted before MaterialApp loads any locale data.
   await initializeDateFormatting();

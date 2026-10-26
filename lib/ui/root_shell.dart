@@ -91,9 +91,7 @@ class _RootShellState extends State<RootShell> {
     _shownOnboarded = _controller.prefs.onboarded;
     if (!_shownOnboarded) {
       return AnnotatedRegion<SystemUiOverlayStyle>(
-        value: t.isDark
-            ? SystemUiOverlayStyle.light
-            : SystemUiOverlayStyle.dark,
+        value: t.systemBars,
         child: OnboardingFlow(controller: _controller),
       );
     }
@@ -103,7 +101,7 @@ class _RootShellState extends State<RootShell> {
       AwardsScreen(controller: _controller),
     ];
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: t.isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      value: t.systemBars,
       child: Scaffold(
         backgroundColor: t.bg,
         body: Stack(

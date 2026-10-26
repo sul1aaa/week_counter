@@ -159,7 +159,7 @@ class _CelebrateScreenState extends State<CelebrateScreen>
     final titleSize = (width * 0.17).clamp(48, 76).toDouble();
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
+      value: Tokens.dark.systemBars,
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Stack(
