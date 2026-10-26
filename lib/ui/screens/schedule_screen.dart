@@ -252,7 +252,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             GroupRow(
               icon: Icons.celebration_rounded,
               title: l10n.confetti,
-              subtitle: l10n.confettiHint,
+              subtitle: android ? l10n.confettiHintAndroid : l10n.confettiHint,
               trailing: AppToggle(
                 label: l10n.confetti,
                 value: _controller.prefs.confetti,

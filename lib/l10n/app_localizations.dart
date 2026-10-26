@@ -938,6 +938,12 @@ abstract class AppLocalizations {
   /// **'With Reduce Motion on, you get a still card instead'**
   String get confettiHint;
 
+  /// No description provided for @confettiHintAndroid.
+  ///
+  /// In en, this message translates to:
+  /// **'With animations off in Settings, you get a still card instead'**
+  String get confettiHintAndroid;
+
   /// No description provided for @weeksCount.
   ///
   /// In en, this message translates to:

@@ -541,6 +541,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'With Reduce Motion on, you get a still card instead';
 
   @override
+  String get confettiHintAndroid =>
+      'With animations off in Settings, you get a still card instead';
+
+  @override
   String weeksCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -224,4 +225,35 @@ void main() {
       last: const CalendarDate(2026, 11, 8),
     ));
   });
+
+  testWidgets(
+    'the confetti hint names the motion setting of the platform',
+    (tester) async {
+      reduceMotion(tester);
+      final controller = await createController();
+      await tester.pumpWidget(
+        WeekCounterApp(controller: controller, locale: const Locale('en')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Schedule'));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.text('Confetti'), 200);
+
+      final android = defaultTargetPlatform == TargetPlatform.android;
+      expect(
+        find.textContaining('Reduce Motion'),
+        android ? findsNothing : findsOneWidget,
+      );
+      expect(
+        find.text(
+          'With animations off in Settings, you get a still card instead',
+        ),
+        android ? findsOneWidget : findsNothing,
+      );
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.android,
+      TargetPlatform.iOS,
+    }),
+  );
 }
