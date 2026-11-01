@@ -79,4 +79,15 @@ void main() {
     final countries = await repository.fetchCountries();
     expect(countries.map((c) => c.code), ['RU', 'US']);
   });
+
+  test('an unreadable country cache counts as no cache', () async {
+    store.data['countries.v1'] = 'not json';
+    expect(await repository.cachedCountries(), isNull);
+
+    server.offline = true;
+    await expectLater(
+      repository.fetchCountries(),
+      throwsA(isA<HolidayApiException>()),
+    );
+  });
 }
