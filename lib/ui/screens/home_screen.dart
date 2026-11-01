@@ -225,12 +225,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
     switch (snapshot.state) {
       case OffNow(:final block) when block.kind == BlockKind.daysOff:
-        final vacation = _controller.vacation != null;
+        // The coming vacation may be a later one, not part of this time off.
+        final vacation = _controller.vacation;
+        final onVacation =
+            vacation != null &&
+            vacation.first <= block.last &&
+            block.first <= vacation.last;
         return InlineCard(
           icon: Icons.beach_access_rounded,
-          title: vacation ? l10n.vacationActive : l10n.kindLabel(block.kind),
+          title: onVacation ? l10n.vacationActive : l10n.kindLabel(block.kind),
           subtitle: l10n.untilInclusive(l10n.dayMonth(block.last)),
-          onTap: () => vacation
+          onTap: () => onVacation
               ? VacationScreen.open(context, _controller)
               : widget.onOpenTab(AppTab.calendar),
         );
