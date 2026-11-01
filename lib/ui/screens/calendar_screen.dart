@@ -12,6 +12,7 @@ import '../kit/buttons.dart';
 import '../kit/glass.dart';
 import '../kit/group.dart';
 import '../kit/pressable.dart';
+import '../root_shell.dart';
 import '../theme/tokens.dart';
 import '../widgets/day_detail_sheet.dart';
 import '../widgets/week_strip.dart';
@@ -163,7 +164,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               Positioned(
                 left: 16,
                 right: 16,
-                bottom: (bottom > 0 ? bottom - 13 : 12) + 62 + 12,
+                bottom: tabBarBottom(context) + tabBarHeight + 12,
                 child: _RangeBar(
                   count: selected.length,
                   onCancel: _clearRange,

@@ -16,6 +16,21 @@ import 'theme/tokens.dart';
 
 enum AppTab { countdown, calendar, awards }
 
+/// Height of the floating tab bar.
+const tabBarHeight = 62.0;
+
+/// How far the floating tab bar sits above the bottom of the screen.
+///
+/// iOS tucks the bar into the home indicator's inset. Android's navigation
+/// buttons and gesture handle live in that inset, so the bar sits above it.
+double tabBarBottom(BuildContext context) {
+  final bottom = MediaQuery.paddingOf(context).bottom;
+  if (bottom == 0) return 12;
+  return defaultTargetPlatform == TargetPlatform.android
+      ? bottom + 8
+      : (bottom - 13).clamp(8.0, 48.0);
+}
+
 class RootShell extends StatefulWidget {
   const RootShell({super.key, required this.controller});
 
@@ -144,14 +159,7 @@ class _RootShellState extends State<RootShell> {
             Positioned(
               left: 0,
               right: 0,
-              // iOS tucks the bar into the home indicator's inset. Android's
-              // navigation buttons and gesture handle live in that inset, so
-              // the bar sits above it.
-              bottom: bottom == 0
-                  ? 12
-                  : defaultTargetPlatform == TargetPlatform.android
-                  ? bottom + 8
-                  : (bottom - 13).clamp(8, 48),
+              bottom: tabBarBottom(context),
               child: Center(
                 child: _TabBar(
                   selected: _tab,
@@ -192,7 +200,7 @@ class _TabBar extends StatelessWidget {
       container: true,
       child: SizedBox(
         width: width,
-        height: 62,
+        height: tabBarHeight,
         child: Glass(
           borderRadius: BorderRadius.circular(32),
           child: Padding(
