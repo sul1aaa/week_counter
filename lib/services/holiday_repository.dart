@@ -105,13 +105,18 @@ class HolidayRepository {
     );
   }
 
+  /// The saved country list, or null if there is none or it can't be read.
   Future<List<Country>?> cachedCountries() async {
     final raw = await _store.getString(_countriesKey);
     if (raw == null) return null;
-    return [
-      for (final item in jsonDecode(raw) as List)
-        Country.fromNager(item as Map<String, dynamic>),
-    ];
+    try {
+      return [
+        for (final item in jsonDecode(raw) as List)
+          Country.fromNager(item as Map<String, dynamic>),
+      ];
+    } on Object {
+      return null;
+    }
   }
 
   /// Fetches the country list, falling back to the cache when offline.
