@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:week_counter/app.dart';
+import 'package:week_counter/core/calendar_date.dart';
 import 'package:week_counter/services/holiday_api.dart';
 import 'package:week_counter/services/holiday_repository.dart';
 import 'package:week_counter/services/local_store.dart';
@@ -13,6 +14,8 @@ import 'package:week_counter/services/prefs_repository.dart';
 import 'package:week_counter/services/settings_repository.dart';
 import 'package:week_counter/services/widget_sync.dart';
 import 'package:week_counter/state/app_controller.dart';
+
+import '../services/fake_nager.dart';
 
 /// Russia's New Year holidays, 1–8 January 2027.
 final _newYear = MockClient((request) async {
@@ -65,5 +68,50 @@ void main() {
     expect(find.text('New Year holiday'), findsOneWidget);
     expect(find.text('Back to work Jan 11, 09:00'), findsOneWidget);
     expect(find.textContaining('mid-week'), findsNothing);
+  });
+
+  testWidgets('days off are only called a vacation during the vacation', (
+    tester,
+  ) async {
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+    final store = InMemoryLocalStore();
+    final controller = AppController(
+      settingsRepository: SettingsRepository(store),
+      holidayRepository: HolidayRepository(
+        store,
+        NagerDateApi(client: FakeNager().client),
+      ),
+      prefsRepository: PrefsRepository(store),
+      widgetSync: NoopWidgetSync(),
+      // Wednesday 21 October.
+      clock: () => DateTime(2026, 10, 21, 12),
+    );
+    await controller.init();
+    await controller.completeOnboarding();
+    await controller.setCountry('RU');
+    await controller.refreshHolidays();
+    // A week off, with a vacation planned for December.
+    await controller.markDaysOff([
+      for (var day = 19; day <= 23; day++) CalendarDate(2026, 10, day),
+    ]);
+    await controller.planVacation(const CalendarDate(2026, 12, 7), 14, 'Trip');
+
+    await tester.pumpWidget(
+      WeekCounterApp(controller: controller, locale: const Locale('en')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Days off'), findsOneWidget);
+    expect(find.text('Until October 25 inclusive'), findsOneWidget);
+    expect(find.text("You're on vacation"), findsNothing);
+
+    // A vacation right after the week off makes it all one vacation.
+    await controller.planVacation(const CalendarDate(2026, 10, 26), 5, 'Trip');
+    await tester.pumpAndSettle();
+
+    expect(find.text("You're on vacation"), findsOneWidget);
+    expect(find.text('Until November 1 inclusive'), findsOneWidget);
   });
 }
