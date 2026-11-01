@@ -12,6 +12,7 @@ import 'package:week_counter/services/prefs_repository.dart';
 import 'package:week_counter/services/settings_repository.dart';
 import 'package:week_counter/services/widget_sync.dart';
 import 'package:week_counter/state/app_controller.dart';
+import 'package:week_counter/ui/kit/glass.dart';
 import 'package:week_counter/ui/widgets/joke_carousel.dart';
 
 import 'services/fake_nager.dart';
@@ -277,6 +278,43 @@ void main() {
         ),
         android ? findsOneWidget : findsNothing,
       );
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.android,
+      TargetPlatform.iOS,
+    }),
+  );
+
+  testWidgets(
+    'the range bar stays above the tab bar',
+    (tester) async {
+      reduceMotion(tester);
+      // A 48dp navigation bar, or the iPhone's home indicator.
+      tester.view.padding = FakeViewPadding(
+        bottom:
+            (defaultTargetPlatform == TargetPlatform.android ? 48 : 34) *
+            tester.view.devicePixelRatio,
+      );
+      addTearDown(tester.view.reset);
+      final controller = await createController();
+      await tester.pumpWidget(
+        WeekCounterApp(controller: controller, locale: const Locale('en')),
+      );
+      await tester.pumpAndSettle();
+      await openTab(tester, 'calendar');
+
+      final day = find.text('28').first;
+      await tester.ensureVisible(day);
+      await tester.pumpAndSettle();
+      await tester.longPress(day);
+      await tester.pumpAndSettle();
+
+      Rect glassAround(Finder finder) => tester.getRect(
+        find.ancestor(of: finder, matching: find.byType(Glass)).first,
+      );
+      final rangeBar = glassAround(find.text('Mark as days off'));
+      final tabBar = glassAround(find.byKey(const ValueKey('tab.calendar')));
+      expect(rangeBar.bottom, lessThan(tabBar.top));
     },
     variant: const TargetPlatformVariant({
       TargetPlatform.android,
