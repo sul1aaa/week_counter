@@ -17,7 +17,9 @@ flutter test
 flutter run
 ```
 
-The project pins Flutter 3.44.9 with fvm (`.fvmrc`), and `.vscode/settings.json` points VS Code at the same SDK. Keep the terminal and the editor on one SDK. Otherwise each one's `pub get` regenerates `ios/Flutter/ephemeral` its own way, and the iOS build fails with "Missing package product" or "home-widget requires 14.0".
+The project pins Flutter 3.44.9 with fvm (`.fvmrc`), and `.vscode/settings.json` points VS Code at the same SDK. Keep the terminal and the editor on one SDK. Otherwise each one's `pub get` regenerates `ios/Flutter/ephemeral` its own way, and the iOS build fails with "Missing package product".
+
+`.vscode/settings.json` also turns off the Dart extension's automatic `pub get` (`dart.runPubGetOnPubspecChanges: never`). home_widget needs iOS 14, but `pub get` writes the generated plugin package with iOS 13. `flutter run` raises it to the Runner's deployment target (14.0) just before Xcode builds. The build strips extended attributes from every project file, including `pubspec.yaml`. The extension took that as an edit and ran `pub get` mid-build, which reset the package to 13.0 and failed with "home-widget requires minimum platform version 14.0". `flutter run` and `flutter build` already run `pub get` when `pubspec.yaml` changes. If you edit dependencies without running the app, run `flutter pub get` yourself.
 
 ## Code map
 
