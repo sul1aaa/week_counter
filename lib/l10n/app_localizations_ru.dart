@@ -9,7 +9,7 @@ class AppLocalizationsRu extends AppLocalizations {
   AppLocalizationsRu([String locale = 'ru']) : super(locale);
 
   @override
-  String get appTitle => 'Счётчик выходных';
+  String get appTitle => 'Orbity';
 
   @override
   String get navCountdown => 'Неделя';
@@ -420,7 +420,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get widgetStepIos2 => 'Нажмите «Править», затем «Добавить виджет»';
 
   @override
-  String get widgetStepIos3 => 'Найдите «Счётчик выходных» и выберите размер';
+  String get widgetStepIos3 => 'Найдите Orbity и выберите размер';
 
   @override
   String get widgetStepAndroid1 =>
@@ -430,8 +430,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get widgetStepAndroid2 => 'Откройте «Виджеты»';
 
   @override
-  String get widgetStepAndroid3 =>
-      'Найдите «Счётчик выходных» и перетащите на экран';
+  String get widgetStepAndroid3 => 'Найдите Orbity и перетащите на экран';
 
   @override
   String get widgetUpdatesNote =>

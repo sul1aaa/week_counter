@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Week Counter';
+  String get appTitle => 'Orbity';
 
   @override
   String get navCountdown => 'Week';
@@ -408,7 +408,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get widgetStepIos2 => 'Tap Edit, then Add Widget';
 
   @override
-  String get widgetStepIos3 => 'Find Week Counter and pick a size';
+  String get widgetStepIos3 => 'Find Orbity and pick a size';
 
   @override
   String get widgetStepAndroid1 =>
@@ -418,8 +418,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get widgetStepAndroid2 => 'Open Widgets';
 
   @override
-  String get widgetStepAndroid3 =>
-      'Find Week Counter and drag it onto the screen';
+  String get widgetStepAndroid3 => 'Find Orbity and drag it onto the screen';
 
   @override
   String get widgetUpdatesNote =>

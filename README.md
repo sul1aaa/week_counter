@@ -1,4 +1,4 @@
-# Week Counter
+# Orbity
 
 Counts down to the end of your last shift before the next weekend or public holiday, with home-screen widgets for Android and iOS. English and Russian.
 
@@ -41,7 +41,7 @@ The project pins Flutter 3.44.9 with fvm (`.fvmrc`), and `.vscode/settings.json`
 
 ## Android widget
 
-To add it, long-press the home screen, open **Widgets**, and choose **Week Counter**. Settings also has an "Add widget" button if your launcher supports it.
+To add it, long-press the home screen, open **Widgets**, and choose **Orbity**. Settings also has an "Add widget" button if your launcher supports it.
 
 The widget ticks every second when the app is allowed to use exact alarms. On Android 14+ that's off by default. Settings shows a **Precise widget countdown › Allow** row that opens the system permission screen. Without the permission, the widget shows "2d 3h" and refreshes about every 30 minutes.
 
@@ -49,7 +49,7 @@ The orb is drawn into a bitmap (`OrbRenderer.kt`), since a widget can't run cust
 
 ## iOS widget
 
-The `WeekCounterWidget` extension target is already in the Xcode project, with the App Group `group.com.example.weekCounter` on both the app and the extension. To add it, long-press the home screen, tap **Edit › Add Widget**, and search for **Week Counter**.
+The `WeekCounterWidget` extension target is already in the Xcode project, with the App Group `group.io.github.sul1aaa.orbity` on both the app and the extension. To add it, long-press the home screen, tap **Edit › Add Widget**, and search for **Orbity**.
 
 **Simulator:** works as is.
 
@@ -57,13 +57,35 @@ The `WeekCounterWidget` extension target is already in the Xcode project, with t
 
 1. Open `ios/Runner.xcworkspace`.
 2. Under **Signing & Capabilities**, select the **Runner** target and then the **WeekCounterWidget** target. Let Xcode register the App Group for each.
-3. If Xcode says the group ID is taken, change `group.com.example.weekCounter` in these 4 places:
+3. If Xcode says the group ID is taken, change `group.io.github.sul1aaa.orbity` in these 4 places:
    - `lib/services/widget_sync.dart` (`HomeWidgetSync.appGroupId`)
    - `ios/WeekCounterWidget/WeekCounterWidget.swift` (`PayloadStore.groupId`)
    - `ios/Runner/Runner.entitlements`
    - `ios/WeekCounterWidget/WeekCounterWidget.entitlements`
 
-   Change the bundle IDs (`com.example.weekCounter…`) the same way if they're taken.
+   Change the bundle IDs (`io.github.sul1aaa.orbity…`) the same way if they're taken.
+
+## App Store
+
+- `store/app-store.md` has the listing text in English and Russian, plus the answers for App Privacy, App Review and export compliance.
+- `PRIVACY.md` is the privacy policy that the listing links to.
+- `store/screenshots/` has the 6.9" iPhone screenshots (1320 × 2868).
+- `design/app-icon.png` is the 1024 px icon source.
+
+### App Store screenshots
+
+`test_driver/screenshots.dart` runs the app as a fresh user on a fixed clock: Thursday 15:00, then Friday 18:00 for the "Weekend!" screen. `test_driver/screenshots_test.dart` taps through it and saves simulator screenshots with the status bar set to match. Run it once per language on an iPhone 17 Pro Max simulator:
+
+```sh
+DEVICE=<simulator id>   # xcrun simctl list devices | grep "17 Pro Max"
+for L in en ru; do
+  SHOTS_DEVICE=$DEVICE SHOTS_DIR=build/shots/$L SHOTS_LOCALE=$L flutter drive \
+    --driver=test_driver/screenshots_test.dart --target=test_driver/screenshots.dart \
+    -d $DEVICE --dart-define=SHOT_LOCALE=$L
+done
+```
+
+Then `store/frame/make.sh build/shots` adds the captions and frames and draws the widgets picture with the widget's own views. It writes `store/screenshots/`.
 
 ## Known limits
 

@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appTitle": "Week Counter",
+  "appTitle": "Orbity",
   "navCountdown": "Week",
   "navCalendar": "Calendar",
 
@@ -123,10 +123,10 @@
   "widgetsTitle": "Widgets",
   "widgetStepIos1": "Touch and hold an empty spot on the home screen",
   "widgetStepIos2": "Tap Edit, then Add Widget",
-  "widgetStepIos3": "Find Week Counter and pick a size",
+  "widgetStepIos3": "Find Orbity and pick a size",
   "widgetStepAndroid1": "Touch and hold an empty spot on the home screen",
   "widgetStepAndroid2": "Open Widgets",
-  "widgetStepAndroid3": "Find Week Counter and drag it onto the screen",
+  "widgetStepAndroid3": "Find Orbity and drag it onto the screen",
   "widgetUpdatesNote": "The numbers update on their own, even when the app is closed.",
   "gotIt": "Got it",
   "done": "Done",

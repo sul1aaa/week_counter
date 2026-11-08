@@ -1,6 +1,6 @@
 {
   "@@locale": "ru",
-  "appTitle": "Счётчик выходных",
+  "appTitle": "Orbity",
   "navCountdown": "Неделя",
   "navCalendar": "Календарь",
 
@@ -107,10 +107,10 @@
   "widgetsTitle": "Виджеты",
   "widgetStepIos1": "Нажмите и подержите пустое место на экране «Домой»",
   "widgetStepIos2": "Нажмите «Править», затем «Добавить виджет»",
-  "widgetStepIos3": "Найдите «Счётчик выходных» и выберите размер",
+  "widgetStepIos3": "Найдите Orbity и выберите размер",
   "widgetStepAndroid1": "Удерживайте палец на пустом месте главного экрана",
   "widgetStepAndroid2": "Откройте «Виджеты»",
-  "widgetStepAndroid3": "Найдите «Счётчик выходных» и перетащите на экран",
+  "widgetStepAndroid3": "Найдите Orbity и перетащите на экран",
   "widgetUpdatesNote": "Цифры обновляются сами, даже когда приложение закрыто.",
   "gotIt": "Понятно",
   "done": "Готово",
