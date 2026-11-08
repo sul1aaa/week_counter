@@ -7,7 +7,7 @@ Counts down to the end of your last shift before the next weekend or public holi
 - **Calendar:** tap a day to mark it as a day off (vacation) or as a workday. A workday override covers things like Russian transferred working Saturdays, or ignoring a holiday you work on. To select a range, long-press the first day, then tap the last.
 - **Design:** the iOS 26 look from the «Выходные» prototype: Wabi neutrals with lime and violet, a glass tab bar (Week, Calendar, Awards), an orb that fills as the week goes by, a line of the week with a crossed-out joke, and a "Weekend!" screen with confetti when time off starts. Light and dark follow the phone; reduced motion turns the animations off.
 - **Schedule, vacation, awards:** the tune button on the Week screen opens Schedule (workdays, hours, holidays, vacation, widget). Vacation marks a run of days off and counts down to your return. Awards count every time off that starts, with badges for 1–52 weeks and a few special ones. First launch walks through a short onboarding.
-- **Widgets:** the app precomputes about three months of countdown text and hands it to the native widget, so the widget stays correct without the app being open.
+- **Widgets:** the app precomputes about three months of countdown text and hands it to the native widget, so the widget stays correct without the app being open. Like the preview in the app's Widgets sheet, the widgets show the orb and the progress bar, filled to how far the week or the time off has gone.
 
 ## Run
 
@@ -44,6 +44,8 @@ The project pins Flutter 3.44.9 with fvm (`.fvmrc`), and `.vscode/settings.json`
 To add it, long-press the home screen, open **Widgets**, and choose **Week Counter**. Settings also has an "Add widget" button if your launcher supports it.
 
 The widget ticks every second when the app is allowed to use exact alarms. On Android 14+ that's off by default. Settings shows a **Precise widget countdown › Allow** row that opens the system permission screen. Without the permission, the widget shows "2d 3h" and refreshes about every 30 minutes.
+
+The orb is drawn into a bitmap (`OrbRenderer.kt`), since a widget can't run custom drawing. It needs width beside the number: from 260dp wide (3 cells on most phones) the widget shows a large orb, from 200dp a smaller one, and below that none. The progress bar shows once the widget is tall enough for all the text. Both catch up on each refresh, about every 30 minutes.
 
 ## iOS widget
 
