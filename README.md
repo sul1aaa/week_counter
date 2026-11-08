@@ -65,6 +65,28 @@ The `WeekCounterWidget` extension target is already in the Xcode project, with t
 
    Change the bundle IDs (`io.github.sul1aaa.orbity…`) the same way if they're taken.
 
+## App Store
+
+- `store/app-store.md` has the listing text in English and Russian, plus the answers for App Privacy, App Review and export compliance.
+- `PRIVACY.md` is the privacy policy that the listing links to.
+- `store/screenshots/` has the 6.9" iPhone screenshots (1320 × 2868).
+- `design/app-icon.png` is the 1024 px icon source.
+
+### App Store screenshots
+
+`test_driver/screenshots.dart` runs the app as a fresh user on a fixed clock: Thursday 15:00, then Friday 18:00 for the "Weekend!" screen. `test_driver/screenshots_test.dart` taps through it and saves simulator screenshots with the status bar set to match. Run it once per language on an iPhone 17 Pro Max simulator:
+
+```sh
+DEVICE=<simulator id>   # xcrun simctl list devices | grep "17 Pro Max"
+for L in en ru; do
+  SHOTS_DEVICE=$DEVICE SHOTS_DIR=build/shots/$L SHOTS_LOCALE=$L flutter drive \
+    --driver=test_driver/screenshots_test.dart --target=test_driver/screenshots.dart \
+    -d $DEVICE --dart-define=SHOT_LOCALE=$L
+done
+```
+
+Then `store/frame/make.sh build/shots` adds the captions and frames and draws the widgets picture with the widget's own views. It writes `store/screenshots/`.
+
 ## Known limits
 
 - Nager.Date has national holidays only. It has no regional holidays and no Russian transferred workdays; use the calendar overrides for those.
