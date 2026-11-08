@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Счётчик выходных</string>
-    <string name="widget_name">Счётчик выходных</string>
+    <string name="app_name">Orbity</string>
+    <string name="widget_name">Orbity</string>
     <string name="widget_description">Обратный отсчёт до выходных и праздников</string>
     <string name="widget_placeholder">Откройте приложение для настройки</string>
     <string name="widget_preview_title">До выходных</string>

@@ -22,7 +22,7 @@ abstract interface class WidgetSync {
 }
 
 class HomeWidgetSync implements WidgetSync {
-  static const appGroupId = 'group.com.example.weekCounter';
+  static const appGroupId = 'group.io.github.sul1aaa.orbity';
   static const iOSName = 'WeekCounterWidget';
   static const androidName =
       'com.example.week_counter.WeekCounterWidgetProvider';

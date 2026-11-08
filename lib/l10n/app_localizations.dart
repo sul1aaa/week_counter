@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'Week Counter'**
+  /// **'Orbity'**
   String get appTitle;
 
   /// No description provided for @navCountdown.
@@ -701,7 +701,7 @@ abstract class AppLocalizations {
   /// No description provided for @widgetStepIos3.
   ///
   /// In en, this message translates to:
-  /// **'Find Week Counter and pick a size'**
+  /// **'Find Orbity and pick a size'**
   String get widgetStepIos3;
 
   /// No description provided for @widgetStepAndroid1.
@@ -719,7 +719,7 @@ abstract class AppLocalizations {
   /// No description provided for @widgetStepAndroid3.
   ///
   /// In en, this message translates to:
-  /// **'Find Week Counter and drag it onto the screen'**
+  /// **'Find Orbity and drag it onto the screen'**
   String get widgetStepAndroid3;
 
   /// No description provided for @widgetUpdatesNote.

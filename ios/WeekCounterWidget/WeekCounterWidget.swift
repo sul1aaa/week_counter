@@ -29,7 +29,7 @@ struct Payload: Decodable {
 }
 
 enum PayloadStore {
-    static let groupId = "group.com.example.weekCounter"
+    static let groupId = "group.io.github.sul1aaa.orbity"
     static let key = "wc_payload_v1"
 
     static func load() -> Payload? {
@@ -46,7 +46,7 @@ enum L10n {
         Locale.preferredLanguages.first?.hasPrefix("ru") ?? false
     }
 
-    static var name: String { isRussian ? "Счётчик выходных" : "Week Counter" }
+    static var name: String { "Orbity" }
     static var description: String {
         isRussian ? "Обратный отсчёт до выходных и праздников" : "Countdown to your next weekend or holiday"
     }

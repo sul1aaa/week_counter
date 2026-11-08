@@ -5,6 +5,8 @@
     <color name="widget_accent">#FFB9A0FF</color>
     <color name="widget_text">#FFF5F5F5</color>
     <color name="widget_text_secondary">#FFA3A19C</color>
+    <!-- Behind the orb in the adaptive launcher icon. -->
+    <color name="ic_launcher_background">#FF000000</color>
     <!-- The progress line, as in the in-app widget preview; the same in dark mode. -->
     <color name="widget_bar_track">#1FFFFFFF</color>
     <color name="widget_bar_work">#FF8B5CF6</color>

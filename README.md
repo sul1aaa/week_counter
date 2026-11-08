@@ -1,4 +1,4 @@
-# Week Counter
+# Orbity
 
 Counts down to the end of your last shift before the next weekend or public holiday, with home-screen widgets for Android and iOS. English and Russian.
 
@@ -41,7 +41,7 @@ The project pins Flutter 3.44.9 with fvm (`.fvmrc`), and `.vscode/settings.json`
 
 ## Android widget
 
-To add it, long-press the home screen, open **Widgets**, and choose **Week Counter**. Settings also has an "Add widget" button if your launcher supports it.
+To add it, long-press the home screen, open **Widgets**, and choose **Orbity**. Settings also has an "Add widget" button if your launcher supports it.
 
 The widget ticks every second when the app is allowed to use exact alarms. On Android 14+ that's off by default. Settings shows a **Precise widget countdown › Allow** row that opens the system permission screen. Without the permission, the widget shows "2d 3h" and refreshes about every 30 minutes.
 
@@ -49,7 +49,7 @@ The orb is drawn into a bitmap (`OrbRenderer.kt`), since a widget can't run cust
 
 ## iOS widget
 
-The `WeekCounterWidget` extension target is already in the Xcode project, with the App Group `group.com.example.weekCounter` on both the app and the extension. To add it, long-press the home screen, tap **Edit › Add Widget**, and search for **Week Counter**.
+The `WeekCounterWidget` extension target is already in the Xcode project, with the App Group `group.io.github.sul1aaa.orbity` on both the app and the extension. To add it, long-press the home screen, tap **Edit › Add Widget**, and search for **Orbity**.
 
 **Simulator:** works as is.
 
@@ -57,13 +57,13 @@ The `WeekCounterWidget` extension target is already in the Xcode project, with t
 
 1. Open `ios/Runner.xcworkspace`.
 2. Under **Signing & Capabilities**, select the **Runner** target and then the **WeekCounterWidget** target. Let Xcode register the App Group for each.
-3. If Xcode says the group ID is taken, change `group.com.example.weekCounter` in these 4 places:
+3. If Xcode says the group ID is taken, change `group.io.github.sul1aaa.orbity` in these 4 places:
    - `lib/services/widget_sync.dart` (`HomeWidgetSync.appGroupId`)
    - `ios/WeekCounterWidget/WeekCounterWidget.swift` (`PayloadStore.groupId`)
    - `ios/Runner/Runner.entitlements`
    - `ios/WeekCounterWidget/WeekCounterWidget.entitlements`
 
-   Change the bundle IDs (`com.example.weekCounter…`) the same way if they're taken.
+   Change the bundle IDs (`io.github.sul1aaa.orbity…`) the same way if they're taken.
 
 ## Known limits
 
