@@ -5,77 +5,138 @@
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
     android:gravity="center_vertical"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:padding="16dp">
 
-    <TextView
-        android:id="@+id/wc_title"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:text="@string/widget_name"
-        android:textColor="@color/widget_text_secondary"
-        android:textSize="12sp"
-        android:textStyle="bold" />
-
-    <!-- One line at a fixed height: the number shrinks to fit a narrow widget (Android 8+)
-         and doesn't grow past the line with a large system font. -->
-    <FrameLayout
-        android:id="@+id/wc_counter"
-        android:layout_width="match_parent"
-        android:layout_height="46dp"
-        android:visibility="gone">
-
-        <Chronometer
-            android:id="@+id/wc_timer"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:autoSizeMaxTextSize="34sp"
-            android:autoSizeMinTextSize="16sp"
-            android:autoSizeTextType="uniform"
-            android:ellipsize="end"
-            android:fontFeatureSettings="tnum"
-            android:gravity="center_vertical"
-            android:letterSpacing="-0.04"
-            android:maxLines="1"
-            android:textColor="@color/widget_text"
-            android:textSize="34sp"
-            android:textStyle="bold" />
+        android:layout_weight="1"
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/wc_coarse"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:autoSizeMaxTextSize="34sp"
-            android:autoSizeMinTextSize="16sp"
-            android:autoSizeTextType="uniform"
+            android:id="@+id/wc_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:gravity="center_vertical"
             android:maxLines="1"
-            android:textColor="@color/widget_text"
-            android:textSize="34sp"
-            android:textStyle="bold"
+            android:text="@string/widget_name"
+            android:textColor="@color/widget_text_secondary"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <!-- One line at a fixed height: the number shrinks to fit a narrow widget (Android 8+)
+             and doesn't grow past the line with a large system font. -->
+        <FrameLayout
+            android:id="@+id/wc_counter"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:visibility="gone">
+
+            <Chronometer
+                android:id="@+id/wc_timer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:autoSizeMaxTextSize="34sp"
+                android:autoSizeMinTextSize="16sp"
+                android:autoSizeTextType="uniform"
+                android:ellipsize="end"
+                android:fontFeatureSettings="tnum"
+                android:gravity="center_vertical"
+                android:letterSpacing="-0.04"
+                android:maxLines="1"
+                android:textColor="@color/widget_text"
+                android:textSize="34sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/wc_coarse"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:autoSizeMaxTextSize="34sp"
+                android:autoSizeMinTextSize="16sp"
+                android:autoSizeTextType="uniform"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:maxLines="1"
+                android:textColor="@color/widget_text"
+                android:textSize="34sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/wc_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/widget_placeholder"
+            android:textColor="@color/widget_text_secondary"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/wc_secondary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/widget_accent"
+            android:textSize="12sp"
             android:visibility="gone" />
-    </FrameLayout>
 
-    <TextView
-        android:id="@+id/wc_subtitle"
+        <!-- The app's progress line, violet while working and lime while off. Two bars
+             because a widget can't recolour one before Android 12. -->
+        <FrameLayout
+            android:id="@+id/wc_bar"
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:layout_marginTop="10dp"
+            android:visibility="gone">
+
+            <ProgressBar
+                android:id="@+id/wc_bar_work"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:indeterminate="false"
+                android:max="1000"
+                android:maxHeight="6dp"
+                android:minHeight="6dp"
+                android:progressDrawable="@drawable/widget_bar_work" />
+
+            <ProgressBar
+                android:id="@+id/wc_bar_off"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:indeterminate="false"
+                android:max="1000"
+                android:maxHeight="6dp"
+                android:minHeight="6dp"
+                android:progressDrawable="@drawable/widget_bar_off"
+                android:visibility="gone" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <!-- The orb on a wide widget: up to 96dp, smaller on a short one. -->
+    <ImageView
+        android:id="@+id/wc_orb"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:text="@string/widget_placeholder"
-        android:textColor="@color/widget_text_secondary"
-        android:textSize="13sp" />
+        android:layout_marginStart="12dp"
+        android:adjustViewBounds="true"
+        android:importantForAccessibility="no"
+        android:maxHeight="96dp"
+        android:maxWidth="96dp"
+        android:visibility="gone" />
 
-    <TextView
-        android:id="@+id/wc_secondary"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textColor="@color/widget_accent"
-        android:textSize="12sp"
+    <!-- The orb on a narrower widget, leaving the number room. -->
+    <ImageView
+        android:id="@+id/wc_orb_small"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="12dp"
+        android:importantForAccessibility="no"
         android:visibility="gone" />
 </LinearLayout>

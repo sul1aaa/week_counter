@@ -58,6 +58,26 @@ void main() {
     expect(first.subtitle, 'Fri 18:00 · 2 days off');
   });
 
+  test('orb fill starts where the run or time off began', () {
+    final segments = buildWidgetPayload(snapshotAt(now), en).segments;
+    // The week started Monday 09:00, before the payload was built.
+    expect(segments[0].from, DateTime(2026, 10, 19, 9));
+    expect(
+      segments[0].toJson()['from'],
+      DateTime(2026, 10, 19, 9).millisecondsSinceEpoch,
+    );
+    // Later segments start exactly where their run or time off begins.
+    for (final segment in segments.skip(1)) {
+      expect(segment.from, segment.start);
+    }
+
+    final off = buildWidgetPayload(
+      snapshotAt(DateTime(2026, 10, 24, 10)),
+      en,
+    ).segments.first;
+    expect(off.from, DateTime(2026, 10, 23, 18));
+  });
+
   test('holiday segment has its name, in Russian too', () {
     // Segments 0–3 are the next two weekends; 4 counts down to Unity Day.
     final enSeg = buildWidgetPayload(snapshotAt(now), en).segments[4];

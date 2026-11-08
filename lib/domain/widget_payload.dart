@@ -21,6 +21,7 @@ class WidgetSegment {
     required this.title,
     required this.subtitle,
     this.target,
+    this.from,
     this.secondary,
   });
 
@@ -32,6 +33,11 @@ class WidgetSegment {
 
   /// What the timer counts down to; null when off with no workday ahead.
   final DateTime? target;
+
+  /// Start of the run of workdays or of the time off, which can be before
+  /// [start]. The orb's fill is how far now is from here to [target], as in
+  /// the app. Null when unknown: the orb then shows empty (full while off).
+  final DateTime? from;
   final String title;
   final String subtitle;
   final String? secondary;
@@ -41,6 +47,7 @@ class WidgetSegment {
     'end': end.millisecondsSinceEpoch,
     'mode': counting ? 'countdown' : 'off',
     'target': target?.millisecondsSinceEpoch,
+    'from': from?.millisecondsSinceEpoch,
     'title': title,
     'subtitle': subtitle,
     'secondary': secondary,
@@ -110,10 +117,11 @@ WidgetPayload buildWidgetPayload(
   int maxBlocks = 12,
 }) {
   final now = snapshot.computedAt;
+  final state = snapshot.state;
   final segments = <WidgetSegment>[];
   var cursor = now;
 
-  for (final block in snapshot.blocks.take(maxBlocks)) {
+  for (final (i, block) in snapshot.blocks.take(maxBlocks).indexed) {
     final details = l10n.blockDetails(block);
     final offStart = block.offStart;
     if (offStart != null && offStart.isAfter(cursor)) {
@@ -123,6 +131,9 @@ WidgetPayload buildWidgetPayload(
           end: offStart,
           counting: true,
           target: offStart,
+          // The current run began before now; each later one begins when
+          // the time off before it ends.
+          from: i == 0 && state is CountingDown ? state.since : cursor,
           title: l10n.untilTitle(block.kind),
           subtitle:
               '${l10n.shortWhen(offStart, cursor)} · '
@@ -141,6 +152,7 @@ WidgetPayload buildWidgetPayload(
         end: end,
         counting: false,
         target: offEnd,
+        from: offStart,
         title: l10n.youreOff,
         subtitle: offEnd == null
             ? l10n.noWorkAhead

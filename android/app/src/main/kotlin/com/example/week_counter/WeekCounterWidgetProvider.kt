@@ -6,6 +6,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
@@ -15,6 +16,7 @@ import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetLaunchIntent
 import es.antonborri.home_widget.HomeWidgetPlugin
 import es.antonborri.home_widget.HomeWidgetProvider
+import kotlin.math.roundToInt
 
 /**
  * Home-screen countdown. Renders the precomputed segment for the current time, so it stays
@@ -23,6 +25,10 @@ import es.antonborri.home_widget.HomeWidgetProvider
  * With exact alarms allowed it shows a live Chronometer that ticks every second; the app
  * schedules widget updates at every point where the text or the day count changes. Without
  * them (default on Android 14+) it shows a coarse "2d 3h" that refreshes about every 30 minutes.
+ *
+ * Beside the text is the app's orb, filled to how far the week (or the time off) has gone, with
+ * the app's progress bar under the text when the widget is tall enough. Both catch up on each
+ * refresh.
  */
 class WeekCounterWidgetProvider : HomeWidgetProvider() {
 
@@ -35,23 +41,45 @@ class WeekCounterWidgetProvider : HomeWidgetProvider() {
         val payload = WidgetPayload.parse(widgetData.getString(WidgetPayload.KEY, null))
         val live = canTickLive(context)
         val now = System.currentTimeMillis()
+        val progress = progressAt(context, payload?.segmentAt(now), now)
         for (id in appWidgetIds) {
             val views = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                // The launcher shows the tallest one that fits and switches on resize.
+                // The launcher shows the biggest one that fits and switches on resize.
                 RemoteViews(
-                    Fit.entries.associate {
-                        SizeF(0f, it.minHeight(context)) to buildViews(context, payload, now, live, it)
-                    },
+                    Fit.entries.flatMap { fit ->
+                        OrbSize.entries.map { orb ->
+                            SizeF(orb.minWidth, fit.minHeight(context)) to
+                                buildViews(context, payload, now, live, progress, fit, orb)
+                        }
+                    }.toMap(),
                 )
             } else {
-                // The portrait height; older launchers keep one layout for both orientations.
-                val height = appWidgetManager.getAppWidgetOptions(id)
-                    .getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
-                buildViews(context, payload, now, live, Fit.forHeight(context, height))
+                // The portrait size; older launchers keep one layout for both orientations.
+                val options = appWidgetManager.getAppWidgetOptions(id)
+                val height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
+                val width = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
+                buildViews(
+                    context, payload, now, live, progress,
+                    Fit.forHeight(context, height), OrbSize.forWidth(width),
+                )
             }
             appWidgetManager.updateAppWidget(id, views)
         }
     }
+
+    /** The orb and bar fill for [segment], with the orb drawn once for every layout. */
+    private fun progressAt(context: Context, segment: WidgetSegment?, now: Long): Progress {
+        val fill = segment?.fillAt(now) ?: 0.5f
+        val mode = when {
+            segment == null -> OrbMode.Paused
+            segment.counting -> OrbMode.Work
+            else -> OrbMode.Weekend
+        }
+        val density = context.resources.displayMetrics.density
+        return Progress(fill, mode, OrbRenderer.render(ORB_DP, density, fill, mode))
+    }
+
+    private class Progress(val fill: Float, val mode: OrbMode, val orb: Bitmap)
 
     override fun onAppWidgetOptionsChanged(
         context: Context,
@@ -84,14 +112,17 @@ class WeekCounterWidgetProvider : HomeWidgetProvider() {
         payload: WidgetPayload?,
         now: Long,
         live: Boolean,
+        progress: Progress,
         fit: Fit,
+        orb: OrbSize,
     ): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.week_counter_widget)
         views.setOnClickPendingIntent(
             R.id.wc_root,
             HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java),
         )
-        views.setInt(R.id.wc_subtitle, "setMaxLines", if (fit == Fit.Regular) 2 else 1)
+        views.setInt(R.id.wc_subtitle, "setMaxLines", if (fit >= Fit.Regular) 2 else 1)
+        showProgress(views, progress, fit, orb)
 
         val segment = payload?.segmentAt(now)
         val target = segment?.target
@@ -117,7 +148,7 @@ class WeekCounterWidgetProvider : HomeWidgetProvider() {
         )
         views.setViewVisibility(
             R.id.wc_secondary,
-            if (fit == Fit.Regular && !segment.secondary.isNullOrEmpty()) View.VISIBLE else View.GONE,
+            if (fit >= Fit.Regular && !segment.secondary.isNullOrEmpty()) View.VISIBLE else View.GONE,
         )
         if (target == null) {
             views.setViewVisibility(R.id.wc_counter, View.GONE)
@@ -149,6 +180,28 @@ class WeekCounterWidgetProvider : HomeWidgetProvider() {
         return views
     }
 
+    /** The orb, if the widget is wide enough, and the bar, if it's tall enough. */
+    private fun showProgress(views: RemoteViews, progress: Progress, fit: Fit, orb: OrbSize) {
+        views.setViewVisibility(R.id.wc_orb, if (orb == OrbSize.Large) View.VISIBLE else View.GONE)
+        views.setViewVisibility(R.id.wc_orb_small, if (orb == OrbSize.Small) View.VISIBLE else View.GONE)
+        when (orb) {
+            OrbSize.Large -> views.setImageViewBitmap(R.id.wc_orb, progress.orb)
+            OrbSize.Small -> views.setImageViewBitmap(R.id.wc_orb_small, progress.orb)
+            OrbSize.None -> {}
+        }
+
+        val off = progress.mode == OrbMode.Weekend
+        views.setViewVisibility(R.id.wc_bar, if (fit == Fit.Full) View.VISIBLE else View.GONE)
+        views.setViewVisibility(R.id.wc_bar_work, if (off) View.GONE else View.VISIBLE)
+        views.setViewVisibility(R.id.wc_bar_off, if (off) View.VISIBLE else View.GONE)
+        views.setProgressBar(
+            if (off) R.id.wc_bar_off else R.id.wc_bar_work,
+            BAR_MAX,
+            (progress.fill * BAR_MAX).roundToInt(),
+            false,
+        )
+    }
+
     /** "2d 3h", "3h 20m" or "20m", matching `compactDuration` in Dart. */
     private fun coarse(remaining: Long, strings: WidgetStrings): String {
         val days = remaining / DAY_MS
@@ -168,7 +221,7 @@ class WeekCounterWidgetProvider : HomeWidgetProvider() {
     }
 
     /** The lines the widget's height has room for, smallest first. */
-    private enum class Fit(private val textDp: Float) {
+    private enum class Fit(private val textDp: Float, private val barDp: Float = 0f) {
         /** The title and the number. */
         Tiny(TITLE_DP),
 
@@ -176,17 +229,37 @@ class WeekCounterWidgetProvider : HomeWidgetProvider() {
         Compact(TITLE_DP + SUBTITLE_DP),
 
         /** Also a second subtitle line and the secondary line, as on the medium iOS widget. */
-        Regular(TITLE_DP + 2 * SUBTITLE_DP + SECONDARY_DP);
+        Regular(TITLE_DP + 2 * SUBTITLE_DP + SECONDARY_DP),
+
+        /** Also the progress bar, once all the text fits. */
+        Full(TITLE_DP + 2 * SUBTITLE_DP + SECONDARY_DP, BAR_DP);
 
         /** The widget height in dp these lines need at the current font size. */
         fun minHeight(context: Context): Float =
-            2 * PADDING_DP + COUNTER_DP + textDp * context.resources.configuration.fontScale
+            2 * PADDING_DP + COUNTER_DP + barDp + textDp * context.resources.configuration.fontScale
 
         companion object {
             /** [height] is 0 until the launcher reports a size. */
             fun forHeight(context: Context, height: Int): Fit =
                 if (height == 0) Regular
                 else entries.lastOrNull { it.minHeight(context) <= height } ?: Tiny
+        }
+    }
+
+    /** How big an orb the widget's width has room for beside the number, smallest first. */
+    private enum class OrbSize(val minWidth: Float) {
+        None(0f),
+
+        /** The 56dp orb. */
+        Small(SMALL_ORB_MIN_WIDTH_DP),
+
+        /** The orb at up to [ORB_DP], shrinking with the height. */
+        Large(LARGE_ORB_MIN_WIDTH_DP);
+
+        companion object {
+            /** [width] is 0 until the launcher reports a size. */
+            fun forWidth(width: Int): OrbSize =
+                if (width == 0) Small else entries.last { it.minWidth <= width }
         }
     }
 
@@ -201,5 +274,15 @@ class WeekCounterWidgetProvider : HomeWidgetProvider() {
         const val TITLE_DP = 16f
         const val SUBTITLE_DP = 18f
         const val SECONDARY_DP = 16f
+        const val BAR_DP = 16f
+
+        /** The large orb's size in week_counter_widget.xml. */
+        const val ORB_DP = 96
+
+        // Widths that leave the number about 100dp beside the orb.
+        const val SMALL_ORB_MIN_WIDTH_DP = 200f
+        const val LARGE_ORB_MIN_WIDTH_DP = 260f
+
+        const val BAR_MAX = 1000
     }
 }

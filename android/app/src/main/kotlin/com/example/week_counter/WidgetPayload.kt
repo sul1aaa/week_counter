@@ -9,10 +9,24 @@ data class WidgetSegment(
     val end: Long,
     val counting: Boolean,
     val target: Long?,
+    /** Start of the run of workdays or of the time off; the orb fills from here to [target]. */
+    val from: Long?,
     val title: String,
     val subtitle: String,
     val secondary: String?,
-)
+) {
+    /**
+     * How full the orb and bar are at [now], from 0 to 1: the share of the run that's done, or
+     * of the time off that's left. Like the app, an unknown start counts as nothing done.
+     */
+    fun fillAt(now: Long): Float {
+        val from = from
+        val to = target
+        val done = if (from == null || to == null || to <= from) 0f
+        else ((now - from).toFloat() / (to - from)).coerceIn(0f, 1f)
+        return if (counting) done else 1f - done
+    }
+}
 
 data class WidgetStrings(
     val dayShort: String,
@@ -49,6 +63,8 @@ data class WidgetPayload(val strings: WidgetStrings, val segments: List<WidgetSe
                             end = item.getLong("end"),
                             counting = item.getString("mode") == "countdown",
                             target = if (item.isNull("target")) null else item.getLong("target"),
+                            // Missing in payloads from before the orb.
+                            from = if (item.isNull("from")) null else item.getLong("from"),
                             title = item.getString("title"),
                             subtitle = item.getString("subtitle"),
                             secondary = item.optStringOrNull("secondary"),
