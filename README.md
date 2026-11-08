@@ -69,7 +69,7 @@ The `WeekCounterWidget` extension target is already in the Xcode project, with t
 
 - `store/app-store.md` has the listing text in English and Russian, plus the answers for App Privacy, App Review and export compliance.
 - `PRIVACY.md` is the privacy policy that the listing links to.
-- `store/screenshots/` has the 6.9" iPhone screenshots (1320 × 2868).
+- `store/screenshots/` has the iPhone screenshots: `6.3-inch` (1206 × 2622, the size App Store Connect asks for) and `6.9-inch` (1320 × 2868).
 - `design/app-icon.png` is the 1024 px icon source.
 
 ### App Store builds
