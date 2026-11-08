@@ -72,6 +72,16 @@ The `WeekCounterWidget` extension target is already in the Xcode project, with t
 - `store/screenshots/` has the 6.9" iPhone screenshots (1320 × 2868).
 - `design/app-icon.png` is the 1024 px icon source.
 
+### App Store builds
+
+Orbity is published from another developer account (team `C466ZHPP34`), so Release builds sign manually with that team's Apple Distribution certificate and its two App Store profiles: `orbity-profile` for the app and `orbity-widget-profile` for the widget. Debug and Profile builds still use your own team. With the certificate (`.p12`) and both profiles installed (double-click each):
+
+1. Raise the build number in `pubspec.yaml`, for example `1.0.0+2` to `1.0.0+3`. Every upload needs a new one.
+2. `flutter build ipa --export-options-plist=ios/ExportOptions.plist`
+3. Upload `build/ios/ipa/*.ipa` with Transporter, then pick the build on the version page in App Store Connect.
+
+Keep certificates and profiles out of the project folder; `.gitignore` blocks `.p12`, `.p8`, `.cer` and `.mobileprovision` files.
+
 ### App Store screenshots
 
 `test_driver/screenshots.dart` runs the app as a fresh user on a fixed clock: Thursday 15:00, then Friday 18:00 for the "Weekend!" screen. `test_driver/screenshots_test.dart` taps through it and saves simulator screenshots with the status bar set to match. Run it once per language on an iPhone 17 Pro Max simulator:

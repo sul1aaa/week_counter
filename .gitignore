@@ -46,3 +46,9 @@ app.*.map.json
 
 # FVM Version Cache
 .fvm/
+
+# Signing secrets: never commit certificates, keys or profiles.
+*.p12
+*.p8
+*.cer
+*.mobileprovision
