@@ -100,12 +100,12 @@ Words from the name and subtitle are left out; the App Store already searches th
 
 ### Screenshots
 
-iPhone 6.9" display, 1320 × 2868, in this order:
+Upload them under **iPhone with Dynamic Island (medium display)**, which takes 1206 × 2622, in this order:
 
-- English: `store/screenshots/en/1-week.png` … `5-awards.png`
-- Russian: `store/screenshots/ru/1-week.png` … `5-awards.png`
+- English: `store/screenshots/6.3-inch/en/1-week.png` … `5-awards.png`
+- Russian: `store/screenshots/6.3-inch/ru/1-week.png` … `5-awards.png`
 
-App Store Connect scales them down for smaller iPhones. To make them again after a UI change, see "App Store screenshots" in the README.
+`store/screenshots/6.9-inch` has the same images at 1320 × 2868, for a large-display group if App Store Connect asks for one. To make them again after a UI change, see "App Store screenshots" in the README.
 
 ### URLs
 
