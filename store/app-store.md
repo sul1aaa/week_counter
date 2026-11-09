@@ -127,10 +127,35 @@ Answer **"No, we do not collect data from this app."** The app has no account, a
 
 ## App Review notes
 
-```text
-No sign-in is needed. On first launch, onboarding asks for the workdays, shift hours and country, then the main screen counts down to the end of the last shift before the weekend.
+Version 1.0 was rejected under Guideline 2.1 (Information Needed): Apple asked for a screen recording and the five answers below. Paste this into **App Review Information › Notes** (4,000 characters max), and attach the recording there or link to it.
 
-Public holidays come from the free Nager.Date API (date.nager.at). The home-screen widgets are in the widget gallery under "Orbity".
+```text
+SCREEN RECORDING
+Recorded on a physical iPhone running iOS 26.6.2, build 1.0.0 (1): attached in the Attachment field below. It starts at launch and shows onboarding, the countdown, schedule, calendar, awards and the home-screen widget.
+
+1. PURPOSE AND AUDIENCE
+Orbity counts down to the end of your work week. It's for adults with a job, office workers and shift workers alike, who want to know exactly how long is left until the weekend or the next holiday. A plain timer can't answer that because the end of the week depends on your workdays, shift hours, public holidays and vacation. Orbity takes all of these into account and counts down to the end of your last shift before time off. A glass orb fills as the week goes by, home-screen widgets show the countdown, and you earn a badge for each weekend you reach.
+
+2. SETUP AND MAIN FEATURES
+No account, login, sample files or purchases are needed. The app is free and has no in-app purchases, ads or user-generated content.
+- Launch the app and tap "Get started".
+- Step 1: choose "Five-day week" or "Your own schedule".
+- Step 2: set the work day's start and end time. The country is filled in from the device region. Tap it to change.
+- Step 3: shows how to add the widget. Tap "Not now" to finish.
+- Week tab: time left until the end of the last shift before time off. Tap the orb for a new line about the week. Pull down to refresh holidays. The Schedule button (top right) changes workdays, hours, country and vacation.
+- Calendar tab: public holidays are marked. Tap a day to change it. Long-press to select several days.
+- Awards tab: badges for the weekends you reach.
+- Widget: touch and hold the home screen, tap Edit > Add Widget, then choose Orbity (small or medium).
+When time off starts, the app shows a "Weekend!" screen with confetti.
+
+3. EXTERNAL SERVICES
+The only one is Nager.Date (https://date.nager.at), a free public holiday API that needs no key or account. The app requests the list of countries and the public holidays for the chosen country and year. Responses are cached on the device, so the app also works offline. There is no authentication, payment, analytics, advertising or AI service, and no personal data is collected.
+
+4. REGIONAL DIFFERENCES
+The app works the same in all regions. The only regional difference is content: it shows the public holidays of the country the user chooses (Nager.Date covers more than 100 countries). If a country isn't covered, or the device is offline with nothing cached, the countdown still works from the user's own schedule, just without public holidays. The app is available in English and Russian.
+
+5. REGULATED INDUSTRY / THIRD-PARTY MATERIAL
+Not applicable. The app isn't in a regulated industry and contains no protected third-party material. Holiday dates come from Nager.Date's free public API.
 ```
 
 ## Export compliance
