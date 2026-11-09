@@ -97,6 +97,26 @@ done
 
 Then `store/frame/make.sh build/shots` adds the captions and frames and draws the widgets picture with the widget's own views. It writes `store/screenshots/`.
 
+## Android release builds
+
+The Android app ID is `io.github.sul1aaa.orbity`, the same as the iOS bundle ID. Google Play never lets an app change it once it's uploaded. The Kotlin classes keep the `com.example.week_counter` package (the Gradle `namespace`), which Play doesn't see.
+
+Release builds sign with your upload key when `android/key.properties` exists, and with the debug keys otherwise. A debug-signed APK is fine to install by hand, but Play rejects it. To set up the upload key once:
+
+1. `keytool -genkey -v -keystore ~/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload`
+2. Create `android/key.properties`:
+
+   ```properties
+   storePassword=<keystore password>
+   keyPassword=<key password>
+   keyAlias=upload
+   storeFile=/Users/<you>/upload-keystore.jks
+   ```
+
+3. `flutter build appbundle` for Play (`build/app/outputs/bundle/release/app-release.aab`), or `flutter build apk` for a file to install directly.
+
+Back up the keystore and its passwords outside the project. `android/.gitignore` already blocks `key.properties`, `.jks` and `.keystore` files.
+
 ## Known limits
 
 - Nager.Date has national holidays only. It has no regional holidays and no Russian transferred workdays; use the calendar overrides for those.
