@@ -94,6 +94,10 @@ class _CountryPickerScreenState extends State<CountryPickerScreen> {
                   style: t.body,
                   backgroundColor: t.surface2,
                   borderRadius: BorderRadius.circular(12),
+                  // The default icons come from the cupertino_icons font,
+                  // which the app doesn't bundle, so they'd draw blank.
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  suffixIcon: const Icon(Icons.cancel_rounded),
                   onChanged: (value) =>
                       setState(() => _query = value.trim().toLowerCase()),
                 ),
