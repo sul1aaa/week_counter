@@ -22,6 +22,7 @@ import '../kit/strike.dart';
 import '../kit/toast.dart';
 import '../root_shell.dart';
 import '../theme/tokens.dart';
+import '../widgets/day_orb.dart';
 import '../widgets/joke_carousel.dart';
 import '../widgets/week_strip.dart';
 import '../widgets/widget_sheet.dart';
@@ -117,6 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ];
         final week = weekOf(today, firstWeekday(context));
         final countable = state is CountingDown || state is OffNow;
+        final orbSize = (width * 0.54).clamp(176, 240).toDouble();
 
         return AppPage(
           largeTitle: false,
@@ -152,12 +154,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: hint,
               ),
             const SizedBox(height: 20),
-            _OrbSection(
-              state: state,
-              now: now,
-              size: (width * 0.54).clamp(176, 240).toDouble(),
-              showTip: !_controller.prefs.orbTipDone && shown.length > 1,
-              onTap: shown.length > 1 ? () => _nextJoke(1) : null,
+            _OrbPager(
+              height: orbSize + DayOrb.textHeight,
+              pages: [
+                _OrbSection(
+                  state: state,
+                  now: now,
+                  size: orbSize,
+                  showTip: !_controller.prefs.orbTipDone && shown.length > 1,
+                  onTap: shown.length > 1 ? () => _nextJoke(1) : null,
+                ),
+                DayOrb(shift: snapshot.dayShift, now: now, size: orbSize),
+              ],
             ),
             if (countable) ...[
               const SizedBox(height: 16),
@@ -476,25 +484,86 @@ class _OrbSection extends StatelessWidget {
       _ => (0.42, OrbMode.paused, 0),
     };
     final caption = showTip ? l10n.orbTip : '';
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 236),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Orb(
-            size: size,
-            fill: fill,
-            mode: mode,
-            onTap: onTap,
-            semanticLabel: l10n.orbLabel(percent),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Orb(
+          size: size,
+          fill: fill,
+          mode: mode,
+          onTap: onTap,
+          semanticLabel: l10n.orbLabel(percent),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 16,
+          child: Text(caption, style: t.mono.copyWith(fontSize: 12)),
+        ),
+      ],
+    );
+  }
+}
+
+/// The week's orb, with the day's orb a swipe away and dots under them.
+class _OrbPager extends StatefulWidget {
+  const _OrbPager({required this.height, required this.pages});
+
+  final double height;
+  final List<Widget> pages;
+
+  @override
+  State<_OrbPager> createState() => _OrbPagerState();
+}
+
+class _OrbPagerState extends State<_OrbPager> {
+  final _pages = PageController();
+  var _current = 0;
+
+  @override
+  void dispose() {
+    _pages.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return Column(
+      children: [
+        SizedBox(
+          height: widget.height,
+          child: PageView(
+            controller: _pages,
+            // The orb's shadow reaches past its page.
+            clipBehavior: Clip.none,
+            onPageChanged: (page) => setState(() => _current = page),
+            children: [
+              for (final page in widget.pages)
+                Align(alignment: Alignment.topCenter, child: page),
+            ],
           ),
-          const SizedBox(height: 10),
-          SizedBox(
-            height: 16,
-            child: Text(caption, style: t.mono.copyWith(fontSize: 12)),
+        ),
+        const SizedBox(height: 8),
+        ExcludeSemantics(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (var i = 0; i < widget.pages.length; i++)
+                AnimatedContainer(
+                  duration: context.reduceMotion ? Duration.zero : Motion.mid,
+                  curve: Motion.out,
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  width: i == _current ? 16 : 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: i == _current ? t.ink2 : t.ink3,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
