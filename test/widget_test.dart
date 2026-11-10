@@ -13,6 +13,7 @@ import 'package:week_counter/services/settings_repository.dart';
 import 'package:week_counter/services/widget_sync.dart';
 import 'package:week_counter/state/app_controller.dart';
 import 'package:week_counter/ui/kit/glass.dart';
+import 'package:week_counter/ui/widgets/day_orb.dart';
 import 'package:week_counter/ui/widgets/joke_carousel.dart';
 
 import 'services/fake_nager.dart';
@@ -76,7 +77,14 @@ void main() {
     expect(find.text('freedom'), findsOneWidget);
     expect(find.textContaining('of the week done'), findsOneWidget);
     expect(find.text('tap the orb for a new line'), findsOneWidget);
-    await tester.scrollUntilVisible(find.byType(JokeCarousel), 200);
+    await tester.scrollUntilVisible(
+      find.byType(JokeCarousel),
+      200,
+      // The page, not the orb pager.
+      scrollable: find.byWidgetPredicate(
+        (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+      ),
+    );
     expect(find.byType(JokeCarousel), findsOneWidget);
 
     await openTab(tester, 'calendar');
@@ -93,6 +101,35 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Week starts'), findsOneWidget);
     expect(find.text('Vacation'), findsOneWidget);
+  });
+
+  testWidgets('swiping the orb shows the day orb', (tester) async {
+    reduceMotion(tester);
+    // A phone screen, so the orb sits below the bar.
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    now = DateTime(2026, 10, 21, 13, 30);
+    final controller = await createController();
+    await tester.pumpWidget(
+      WeekCounterApp(controller: controller, locale: const Locale('en')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('until the end of the shift at 18:00'), findsNothing);
+
+    await tester.drag(find.byType(PageView), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('until the end of the shift at 18:00'), findsOneWidget);
+    // A screen reader reads the whole page in one go.
+    expect(
+      tester.getSemantics(find.byType(DayOrb)).label,
+      "50% of today's shift done\n4 hours 30 min\n"
+      'until the end of the shift at 18:00',
+    );
+    expect(find.text('tap the orb for a new line'), findsNothing);
+    // The week's countdown above stays put.
+    expect(find.textContaining('of the week done'), findsOneWidget);
   });
 
   testWidgets('the back button returns to Week from another tab', (
