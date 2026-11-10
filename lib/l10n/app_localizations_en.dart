@@ -365,6 +365,33 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String dayOrbLeft(String time) {
+    return 'until the end of the shift at $time';
+  }
+
+  @override
+  String get dayOrbStarts => 'your shift starts';
+
+  @override
+  String get dayOrbDoneTitle => 'Done for today';
+
+  @override
+  String dayOrbDoneBody(String time) {
+    return 'the shift ended at $time';
+  }
+
+  @override
+  String get dayOrbOffTitle => 'Day off';
+
+  @override
+  String get dayOrbOffBody => 'no shift today';
+
+  @override
+  String dayOrbLabel(int percent) {
+    return '$percent% of today\'s shift done';
+  }
+
+  @override
   String get jokesLabel => 'Lines of the week';
 
   @override

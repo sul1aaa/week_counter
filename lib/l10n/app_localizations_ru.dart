@@ -376,6 +376,33 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String dayOrbLeft(String time) {
+    return 'до конца смены в $time';
+  }
+
+  @override
+  String get dayOrbStarts => 'начало смены';
+
+  @override
+  String get dayOrbDoneTitle => 'На сегодня всё';
+
+  @override
+  String dayOrbDoneBody(String time) {
+    return 'смена закончилась в $time';
+  }
+
+  @override
+  String get dayOrbOffTitle => 'Выходной';
+
+  @override
+  String get dayOrbOffBody => 'сегодня без смены';
+
+  @override
+  String dayOrbLabel(int percent) {
+    return '$percent% смены позади';
+  }
+
+  @override
   String get jokesLabel => 'Фразы недели';
 
   @override

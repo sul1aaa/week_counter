@@ -632,6 +632,48 @@ abstract class AppLocalizations {
   /// **'{percent}% done. Tap for a new line'**
   String orbLabel(int percent);
 
+  /// No description provided for @dayOrbLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'until the end of the shift at {time}'**
+  String dayOrbLeft(String time);
+
+  /// No description provided for @dayOrbStarts.
+  ///
+  /// In en, this message translates to:
+  /// **'your shift starts'**
+  String get dayOrbStarts;
+
+  /// No description provided for @dayOrbDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Done for today'**
+  String get dayOrbDoneTitle;
+
+  /// No description provided for @dayOrbDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'the shift ended at {time}'**
+  String dayOrbDoneBody(String time);
+
+  /// No description provided for @dayOrbOffTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Day off'**
+  String get dayOrbOffTitle;
+
+  /// No description provided for @dayOrbOffBody.
+  ///
+  /// In en, this message translates to:
+  /// **'no shift today'**
+  String get dayOrbOffBody;
+
+  /// No description provided for @dayOrbLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of today\'s shift done'**
+  String dayOrbLabel(int percent);
+
   /// No description provided for @jokesLabel.
   ///
   /// In en, this message translates to:
