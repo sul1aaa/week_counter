@@ -277,6 +277,102 @@ void main() {
     expect(state.target, at(2026, 10, 23, 16, 30));
   });
 
+  group('day shift', () {
+    final e = engine(holidays: [holiday(2026, 11, 4, 'Unity Day')]);
+
+    test('during a shift is that shift, half done at 13:30', () {
+      final now = at(2026, 10, 21, 13, 30);
+      final shift = e.snapshot(now).dayShift!;
+      expect(shift.start, at(2026, 10, 21, 9));
+      expect(shift.end, at(2026, 10, 21, 18));
+      expect(shift.progress(now), closeTo(0.5, 1e-9));
+    });
+
+    test("before the shift is today's, not started", () {
+      final now = at(2026, 10, 21, 7);
+      final shift = e.snapshot(now).dayShift!;
+      expect(shift.start, at(2026, 10, 21, 9));
+      expect(shift.progress(now), 0);
+    });
+
+    test("after the shift is still today's, done", () {
+      final now = at(2026, 10, 21, 20);
+      final shift = e.snapshot(now).dayShift!;
+      expect(shift.end, at(2026, 10, 21, 18));
+      expect(shift.progress(now), 1);
+    });
+
+    test('none on a weekend or a holiday', () {
+      expect(e.snapshot(at(2026, 10, 24, 12)).dayShift, isNull);
+      expect(e.snapshot(at(2026, 11, 4, 12)).dayShift, isNull);
+    });
+
+    test('follows per-day hours', () {
+      final e = engine(
+        schedule: WorkSchedule.standard.copyWith(
+          customShifts: {
+            DateTime.friday: const Shift(ShiftTime(9, 0), ShiftTime(16, 30)),
+          },
+        ),
+      );
+      expect(
+        e.snapshot(at(2026, 10, 23, 12)).dayShift!.end,
+        at(2026, 10, 23, 16, 30),
+      );
+    });
+
+    test('a workday override has a shift', () {
+      final e = engine(
+        overrides: {
+          const CalendarDate(2026, 10, 24): const DayOverride(
+            OverrideKind.workday,
+          ),
+        },
+      );
+      expect(
+        e.snapshot(at(2026, 10, 24, 12)).dayShift!.end,
+        at(2026, 10, 24, 18),
+      );
+    });
+
+    test('with every day a workday', () {
+      final e = engine(
+        schedule: WorkSchedule.standard.copyWith(
+          workdays: {1, 2, 3, 4, 5, 6, 7},
+        ),
+      );
+      final s = e.snapshot(at(2026, 10, 24, 12));
+      expect(s.state, isA<NoDaysOff>());
+      expect(s.dayShift!.end, at(2026, 10, 24, 18));
+    });
+
+    group('overnight 22:00–06:00', () {
+      final e = engine(
+        schedule: WorkSchedule.standard.copyWith(
+          defaultShift: const Shift(ShiftTime(22, 0), ShiftTime(6, 0)),
+        ),
+      );
+
+      test("after midnight is yesterday's shift", () {
+        final s = e.snapshot(at(2026, 10, 22, 3));
+        expect(s.dayShift!.start, at(2026, 10, 21, 22));
+        expect(s.dayShift!.end, at(2026, 10, 22, 6));
+        expect(s.validUntil, at(2026, 10, 22, 6));
+      });
+
+      test("after it ends is today's shift tonight", () {
+        final s = e.snapshot(at(2026, 10, 22, 6));
+        expect(s.dayShift!.start, at(2026, 10, 22, 22));
+      });
+
+      test('Saturday 03:00 is still the Friday shift', () {
+        final s = e.snapshot(at(2026, 10, 24, 3));
+        expect(s.dayShift!.end, at(2026, 10, 24, 6));
+        expect(e.snapshot(at(2026, 10, 24, 7)).dayShift, isNull);
+      });
+    });
+  });
+
   test('upcoming list starts after the current block', () {
     final s = engine().snapshot(at(2026, 10, 24, 10));
     expect(s.blocks.first.first, const CalendarDate(2026, 10, 24));

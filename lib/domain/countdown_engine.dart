@@ -126,6 +126,25 @@ final class OffNow extends CountdownState {
   double progress(DateTime now) => _fraction(block.offStart, backToWork, now);
 }
 
+/// One shift: when it starts and when it ends.
+@immutable
+class DayShift {
+  const DayShift({required this.start, required this.end});
+
+  final DateTime start;
+  final DateTime end;
+
+  /// How much of the shift is done, from 0 to 1.
+  double progress(DateTime now) => _fraction(start, end, now);
+
+  @override
+  bool operator ==(Object other) =>
+      other is DayShift && other.start == start && other.end == end;
+
+  @override
+  int get hashCode => Object.hash(start, end);
+}
+
 double _fraction(DateTime? from, DateTime? to, DateTime now) {
   if (from == null || to == null || !to.isAfter(from)) return 0;
   final done =
@@ -152,10 +171,14 @@ class CountdownSnapshot {
     required this.validUntil,
     this.nextWeekend,
     this.nextHoliday,
+    this.dayShift,
   });
 
   final DateTime computedAt;
   final CountdownState state;
+
+  /// The shift the day orb counts down. See [CountdownEngine.dayShift].
+  final DayShift? dayShift;
 
   /// The current block (if off now) followed by upcoming blocks.
   final List<OffBlock> blocks;
@@ -277,6 +300,26 @@ class CountdownEngine {
     return null;
   }
 
+  /// The shift running at [now], or else today's shift, which may not have
+  /// started yet or may be over. Null on a day off.
+  DayShift? dayShift(DateTime now) {
+    final today = CalendarDate.fromDateTime(now);
+    final yesterday = today.addDays(-1);
+    // Yesterday's shift may still be running if it is overnight.
+    if (_day(yesterday).isWork &&
+        now.isBefore(schedule.shiftEndOn(yesterday))) {
+      return DayShift(
+        start: schedule.shiftStartOn(yesterday),
+        end: schedule.shiftEndOn(yesterday),
+      );
+    }
+    if (_day(today).isOff) return null;
+    return DayShift(
+      start: schedule.shiftStartOn(today),
+      end: schedule.shiftEndOn(today),
+    );
+  }
+
   CountdownSnapshot snapshot(DateTime now) {
     final today = CalendarDate.fromDateTime(now);
     var validUntil = today.addDays(1).startOfDay;
@@ -285,6 +328,10 @@ class CountdownEngine {
         validUntil = time;
       }
     }
+
+    final shift = dayShift(now);
+    // Once an overnight shift from yesterday ends, today's shift takes over.
+    until(shift?.end);
 
     final hasForcedWorkdays = classifier.overrides.values.any(
       (o) => o.kind == OverrideKind.workday,
@@ -295,6 +342,7 @@ class CountdownEngine {
         state: const NoWorkdays(),
         blocks: const [],
         validUntil: validUntil,
+        dayShift: shift,
       );
     }
 
@@ -305,6 +353,7 @@ class CountdownEngine {
         state: const NoDaysOff(),
         blocks: const [],
         validUntil: validUntil,
+        dayShift: shift,
       );
     }
 
@@ -343,6 +392,7 @@ class CountdownEngine {
       validUntil: validUntil,
       nextWeekend: upcoming.where((b) => b.hasScheduledOff).firstOrNull,
       nextHoliday: upcoming.where((b) => b.hasExtraOff).firstOrNull,
+      dayShift: shift,
     );
   }
 }
