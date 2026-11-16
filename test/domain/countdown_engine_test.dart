@@ -253,6 +253,31 @@ void main() {
       expect(e.snapshot(at(2026, 10, 21, 12)).state, isA<NoWorkdays>());
     });
 
+    test('no workdays, and a working Saturday that is over', () {
+      final e = engine(
+        schedule: WorkSchedule.standard.copyWith(workdays: {}),
+        overrides: {
+          const CalendarDate(2026, 3, 7): const DayOverride(
+            OverrideKind.workday,
+          ),
+        },
+      );
+      expect(e.snapshot(at(2026, 10, 21, 12)).state, isA<NoWorkdays>());
+    });
+
+    test('no workdays but a working Saturday ahead', () {
+      final e = engine(
+        schedule: WorkSchedule.standard.copyWith(workdays: {}),
+        overrides: {
+          const CalendarDate(2026, 10, 24): const DayOverride(
+            OverrideKind.workday,
+          ),
+        },
+      );
+      final state = e.snapshot(at(2026, 10, 21, 12)).state;
+      expect((state as OffNow).backToWork, at(2026, 10, 24, 9));
+    });
+
     test('every day a workday and no holidays', () {
       final e = engine(
         schedule: WorkSchedule.standard.copyWith(
