@@ -199,7 +199,7 @@ class _Hero extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
-          const Orb(size: 150, fill: 0.42, mode: OrbMode.paused, still: false),
+          const Orb(size: 150, fill: 0.42, mode: OrbMode.paused),
           const SizedBox(height: 16),
           Semantics(
             header: true,

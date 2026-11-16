@@ -13,6 +13,7 @@ import 'package:week_counter/services/settings_repository.dart';
 import 'package:week_counter/services/widget_sync.dart';
 import 'package:week_counter/state/app_controller.dart';
 import 'package:week_counter/ui/kit/glass.dart';
+import 'package:week_counter/ui/screens/vacation_screen.dart';
 import 'package:week_counter/ui/widgets/day_orb.dart';
 import 'package:week_counter/ui/widgets/joke_carousel.dart';
 
@@ -130,6 +131,26 @@ void main() {
     expect(find.text('tap the orb for a new line'), findsNothing);
     // The week's countdown above stays put.
     expect(find.textContaining('of the week done'), findsOneWidget);
+  });
+
+  testWidgets('the vacation orb holds still when motion is reduced', (
+    tester,
+  ) async {
+    reduceMotion(tester);
+    final controller = await createController();
+    await tester.pumpWidget(
+      WeekCounterApp(controller: controller, locale: const Locale('en')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Schedule'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Vacation'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Vacation'));
+    // Settles only if nothing on the screen loops.
+    await tester.pumpAndSettle();
+
+    expect(find.byType(VacationScreen), findsOneWidget);
   });
 
   testWidgets('the back button returns to Week from another tab', (
