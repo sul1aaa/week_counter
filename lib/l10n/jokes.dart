@@ -215,7 +215,12 @@ List<JokePool> jokePools(
             ? [JokePool.holiday, JokePool.daysOff]
             : [JokePool.midweekHoliday, JokePool.holiday];
       }
-      if (five && now.weekday == DateTime.sunday && now.hour >= 16) {
+      // Only when Monday is a workday, not before a Monday holiday.
+      if (five &&
+          now.weekday == DateTime.sunday &&
+          now.hour >= 16 &&
+          backToWork != null &&
+          CalendarDate.fromDateTime(backToWork) == today.addDays(1)) {
         return [JokePool.sunEvening];
       }
       if (backToWork != null &&
