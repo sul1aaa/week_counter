@@ -39,6 +39,24 @@ void main() {
     expect(poolsAt(DateTime(2026, 10, 26, 1, 30)), [JokePool.preWork]);
   });
 
+  test('Sunday evening before a Monday holiday is still the weekend', () {
+    // Defender of the Fatherland Day, Monday 23 February 2026.
+    const monday = CalendarDate(2026, 2, 23);
+    final now = DateTime(2026, 2, 22, 20);
+    final state = CountdownEngine(
+      DayClassifier(
+        schedule: WorkSchedule.standard,
+        holidays: {
+          monday: [
+            Holiday(date: monday, name: 'H', localName: 'H', countryCode: 'RU'),
+          ],
+        },
+        overrides: const {},
+      ),
+    ).snapshot(now).state;
+    expect(jokePools(state, WorkSchedule.standard, now), [JokePool.weekend]);
+  });
+
   test('only a holiday inside the work week is mid-week', () {
     Map<CalendarDate, List<Holiday>> holidays(List<CalendarDate> dates) => {
       for (final date in dates)
