@@ -49,6 +49,23 @@ void main() {
     expect(c.celebrationDue, isNull);
   });
 
+  test('a region wider than a country is not taken for one', () async {
+    final c = AppController(
+      settingsRepository: SettingsRepository(store),
+      holidayRepository: HolidayRepository(
+        store,
+        NagerDateApi(client: FakeNager().client),
+      ),
+      widgetSync: NoopWidgetSync(),
+      clock: () => now,
+      // Spanish (Latin America).
+      deviceLocales: () => const [Locale('es', '419')],
+    );
+    await c.init();
+    expect(c.settings.countryCode, isNull);
+    expect(c.missingYears, isEmpty);
+  });
+
   test('the widget falls back to the next language, like the app', () async {
     final widgetSync = NoopWidgetSync();
     final c = AppController(

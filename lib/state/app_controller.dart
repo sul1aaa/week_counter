@@ -182,9 +182,13 @@ class AppController extends ChangeNotifier {
   Future<void> init() async {
     final saved = await _settingsRepository.load();
     if (saved == null) {
-      // First launch: guess the country from the phone's region.
+      // First launch: guess the country from the phone's region, unless
+      // it's a wider area such as 419, Latin America.
+      final region = _deviceLocales().firstOrNull?.countryCode?.toUpperCase();
       _settings = AppSettings(
-        countryCode: _deviceLocales().firstOrNull?.countryCode?.toUpperCase(),
+        countryCode: region != null && RegExp(r'^[A-Z]{2}$').hasMatch(region)
+            ? region
+            : null,
       );
       await _settingsRepository.save(_settings);
     } else {
