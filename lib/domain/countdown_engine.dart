@@ -333,8 +333,9 @@ class CountdownEngine {
     // Once an overnight shift from yesterday ends, today's shift takes over.
     until(shift?.end);
 
-    final hasForcedWorkdays = classifier.overrides.values.any(
-      (o) => o.kind == OverrideKind.workday,
+    // Workdays marked in the past don't count: they're over.
+    final hasForcedWorkdays = classifier.overrides.entries.any(
+      (e) => e.value.kind == OverrideKind.workday && e.key >= today,
     );
     if (schedule.workdays.isEmpty && !hasForcedWorkdays) {
       return CountdownSnapshot(
