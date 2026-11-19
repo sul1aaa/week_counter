@@ -4,6 +4,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:week_counter/core/calendar_date.dart';
 import 'package:week_counter/domain/countdown_engine.dart';
 import 'package:week_counter/models/app_settings.dart';
+import 'package:week_counter/models/countdown.dart';
 import 'package:week_counter/models/work_schedule.dart';
 import 'package:week_counter/services/holiday_api.dart';
 import 'package:week_counter/services/holiday_repository.dart';
@@ -189,5 +190,59 @@ void main() {
       dentist,
       const CalendarDate(2026, 11, 11),
     });
+  });
+
+  test('adds, edits and removes countdowns, soonest first', () async {
+    final c = await create();
+    await c.addCountdown('Birthday', const CalendarDate(2027, 2, 14));
+    await c.addCountdown('Trip', const CalendarDate(2026, 12, 24));
+    expect(c.upcomingCountdowns.map((e) => e.title), ['Trip', 'Birthday']);
+
+    final trip = c.upcomingCountdowns.first;
+    await c.updateCountdown(
+      trip.copyWith(title: 'Almaty', date: const CalendarDate(2027, 3, 1)),
+    );
+    expect(c.upcomingCountdowns.map((e) => e.title), ['Birthday', 'Almaty']);
+
+    await c.removeCountdown(c.upcomingCountdowns.first.id);
+    expect(c.upcomingCountdowns, [
+      Countdown(
+        id: trip.id,
+        title: 'Almaty',
+        date: const CalendarDate(2027, 3, 1),
+      ),
+    ]);
+
+    // Saved, so a fresh start still has it.
+    final again = await create();
+    expect(again.upcomingCountdowns.map((e) => e.title), ['Almaty']);
+  });
+
+  test('a countdown shows through its day and is dropped after', () async {
+    final c = await create();
+    await c.addCountdown('Payday', const CalendarDate(2026, 10, 22));
+    await c.addCountdown('Trip', const CalendarDate(2026, 12, 24));
+
+    now = DateTime(2026, 10, 22, 23, 59);
+    expect(c.upcomingCountdowns.map((e) => e.title), ['Payday', 'Trip']);
+
+    now = DateTime(2026, 10, 23, 0, 1);
+    expect(c.upcomingCountdowns.map((e) => e.title), ['Trip']);
+    expect(c.settings.countdowns, hasLength(2));
+
+    // The past one goes the next time the list is saved.
+    await c.addCountdown('Concert', const CalendarDate(2026, 11, 1));
+    expect(c.settings.countdowns.map((e) => e.title), ['Trip', 'Concert']);
+  });
+
+  test('countdowns leave the weekend count and the party alone', () async {
+    final c = await create();
+    now = DateTime(2026, 10, 23, 18, 30); // Friday, the weekend has begun
+    c.recompute();
+    expect(c.celebrationDue, isNotNull);
+
+    await c.addCountdown('Trip', const CalendarDate(2026, 12, 24));
+    expect(c.celebrationDue, isNotNull);
+    expect(c.prefs.weeks, 1);
   });
 }

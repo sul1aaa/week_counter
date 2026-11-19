@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../core/calendar_date.dart';
+import 'countdown.dart';
 import 'work_schedule.dart';
 
 enum OverrideKind { dayOff, workday }
@@ -36,6 +37,7 @@ class AppSettings {
     this.countryCode,
     this.schedule = WorkSchedule.standard,
     this.overrides = const {},
+    this.countdowns = const [],
   });
 
   factory AppSettings.fromJson(Map<String, dynamic> json) => AppSettings(
@@ -48,6 +50,10 @@ class AppSettings {
           e.value as Map<String, dynamic>,
         ),
     },
+    countdowns: [
+      for (final c in json['countdowns'] as List? ?? const [])
+        Countdown.fromJson(c as Map<String, dynamic>),
+    ],
   );
 
   /// ISO 3166-1 alpha-2 code used for public holidays; null means none.
@@ -55,14 +61,19 @@ class AppSettings {
   final WorkSchedule schedule;
   final Map<CalendarDate, DayOverride> overrides;
 
+  /// The user's own events, in the order they were added.
+  final List<Countdown> countdowns;
+
   AppSettings copyWith({
     ValueGetter<String?>? countryCode,
     WorkSchedule? schedule,
     Map<CalendarDate, DayOverride>? overrides,
+    List<Countdown>? countdowns,
   }) => AppSettings(
     countryCode: countryCode != null ? countryCode() : this.countryCode,
     schedule: schedule ?? this.schedule,
     overrides: overrides ?? this.overrides,
+    countdowns: countdowns ?? this.countdowns,
   );
 
   Map<String, dynamic> toJson() => {
@@ -71,5 +82,6 @@ class AppSettings {
     'overrides': {
       for (final e in overrides.entries) e.key.toIso(): e.value.toJson(),
     },
+    'countdowns': [for (final c in countdowns) c.toJson()],
   };
 }

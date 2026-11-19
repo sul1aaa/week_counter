@@ -398,6 +398,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jokesMore => 'Other lines';
 
   @override
+  String get countdownsTitle => 'Countdowns';
+
+  @override
+  String get countdownsEmptyTitle => 'Count down to your own dates';
+
+  @override
+  String get countdownsEmptyBody => 'A trip, a birthday, the end of probation';
+
+  @override
+  String get countdownAdd => 'Add countdown';
+
+  @override
+  String get countdownNew => 'New countdown';
+
+  @override
+  String get countdownEdit => 'Edit countdown';
+
+  @override
+  String get countdownTitleHint => 'What are you waiting for?';
+
+  @override
+  String get countdownDelete => 'Delete';
+
+  @override
   String get hintCountryTitle => 'Count public holidays';
 
   @override
