@@ -398,6 +398,145 @@ void main() {
     });
   });
 
+  group('2/2 rotation, 08:00–20:00, from Monday 19 October', () {
+    final rotation = ShiftRotation(
+      cycle: RotationPreset.twoTwo.cycle,
+      start: const CalendarDate(2026, 10, 19),
+    );
+    final e = engine(
+      schedule: WorkSchedule.standard.copyWith(rotation: () => rotation),
+    );
+
+    test('works Monday and Tuesday, then has two days off', () {
+      final state = e.snapshot(at(2026, 10, 19, 12)).state as CountingDown;
+      expect(state.target, at(2026, 10, 20, 20));
+      expect(state.since, at(2026, 10, 19, 8));
+      expect(state.block.first, const CalendarDate(2026, 10, 21));
+      expect(state.block.length, 2);
+      expect(state.block.kind, BlockKind.weekend);
+      expect(state.block.offEnd, at(2026, 10, 23, 8));
+    });
+
+    test('runs through the weekend like any other days', () {
+      expect(
+        e.classifier.classify(const CalendarDate(2026, 10, 24)).isWork,
+        isTrue,
+      );
+      expect(
+        e.classifier.classify(const CalendarDate(2026, 10, 26)).isOff,
+        isTrue,
+      );
+    });
+
+    test('runs back before the day it starts on', () {
+      expect(
+        e.classifier.classify(const CalendarDate(2026, 10, 16)).isWork,
+        isTrue,
+      );
+      expect(
+        e.classifier.classify(const CalendarDate(2026, 10, 17)).isOff,
+        isTrue,
+      );
+      expect(
+        e.classifier.classify(const CalendarDate(2026, 10, 18)).isOff,
+        isTrue,
+      );
+    });
+
+    test('counts without any weekly workdays', () {
+      final e = engine(
+        schedule: WorkSchedule.standard.copyWith(
+          workdays: {},
+          rotation: () => rotation,
+        ),
+      );
+      expect(e.snapshot(at(2026, 10, 19, 12)).state, isA<CountingDown>());
+    });
+  });
+
+  group('day/night rotation from Monday 19 October', () {
+    final e = engine(
+      schedule: WorkSchedule.standard.copyWith(
+        rotation: () => ShiftRotation(
+          cycle: RotationPreset.dayNight.cycle,
+          start: const CalendarDate(2026, 10, 19),
+        ),
+      ),
+    );
+
+    test("Tuesday's night shift ends the run on Wednesday morning", () {
+      final s = e.snapshot(at(2026, 10, 20, 23));
+      final state = s.state as CountingDown;
+      expect(state.target, at(2026, 10, 21, 8));
+      expect(state.inShiftUntil, at(2026, 10, 21, 8));
+      expect(
+        s.dayShift,
+        DayShift(start: at(2026, 10, 20, 20), end: at(2026, 10, 21, 8)),
+      );
+    });
+
+    test("back to work with Friday's day shift", () {
+      final state = e.snapshot(at(2026, 10, 21, 12)).state as OffNow;
+      expect(state.backToWork, at(2026, 10, 23, 8));
+    });
+  });
+
+  test('24 hours on, 3 days off', () {
+    final e = engine(
+      schedule: WorkSchedule.standard.copyWith(
+        rotation: () => ShiftRotation(
+          cycle: RotationPreset.dayThreeOff.cycle,
+          start: const CalendarDate(2026, 10, 19),
+          dayShift: const Shift(ShiftTime(8, 0), ShiftTime(8, 0)),
+        ),
+      ),
+    );
+    final working = e.snapshot(at(2026, 10, 19, 12)).state as CountingDown;
+    expect(working.target, at(2026, 10, 20, 8));
+    expect(working.block.length, 3);
+    final off = e.snapshot(at(2026, 10, 20, 9)).state as OffNow;
+    expect(off.backToWork, at(2026, 10, 23, 8));
+  });
+
+  group('a holiday on a rotation workday', () {
+    // Unity Day falls on the second workday of the run.
+    WorkSchedule rotation({required bool holidaysOff}) =>
+        WorkSchedule.standard.copyWith(
+          rotation: () => ShiftRotation(
+            cycle: RotationPreset.twoTwo.cycle,
+            start: const CalendarDate(2026, 11, 3),
+            holidaysOff: holidaysOff,
+          ),
+        );
+    final holidays = [holiday(2026, 11, 4, 'Unity Day')];
+
+    test('is worked by default', () {
+      final e = engine(
+        schedule: rotation(holidaysOff: false),
+        holidays: holidays,
+      );
+      final day = e.classifier.classify(unityDay);
+      expect(day.isWork, isTrue);
+      expect(day.isExtraWorkday, isFalse);
+      expect(day.holidays.single.name, 'Unity Day');
+      final state = e.snapshot(at(2026, 11, 3, 12)).state as CountingDown;
+      expect(state.target, at(2026, 11, 4, 20));
+    });
+
+    test('is a day off when holidays are', () {
+      final e = engine(
+        schedule: rotation(holidaysOff: true),
+        holidays: holidays,
+      );
+      final day = e.classifier.classify(unityDay);
+      expect(day.isOff, isTrue);
+      expect(day.reasons, contains(OffReason.publicHoliday));
+      final state = e.snapshot(at(2026, 11, 3, 12)).state as CountingDown;
+      expect(state.target, at(2026, 11, 3, 20));
+      expect(state.block.length, 3);
+    });
+  });
+
   test('upcoming list starts after the current block', () {
     final s = engine().snapshot(at(2026, 10, 24, 10));
     expect(s.blocks.first.first, const CalendarDate(2026, 10, 24));

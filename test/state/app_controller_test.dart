@@ -124,6 +124,23 @@ void main() {
     expect(c.prefs.earned.keys, contains('friday13'));
   });
 
+  test('a rotation that ends on a night shift earns the night award', () async {
+    final c = await create();
+    // Tuesday's day shift, then Wednesday 20:00 to Thursday 08:00.
+    await c.updateSchedule(
+      WorkSchedule.standard.copyWith(
+        rotation: () => ShiftRotation(
+          cycle: RotationPreset.dayNight.cycle,
+          start: const CalendarDate(2026, 10, 20),
+        ),
+      ),
+    );
+    now = DateTime(2026, 10, 22, 12);
+    c.recompute();
+    expect(c.prefs.weeks, 1);
+    expect(c.prefs.earned.keys, contains('nightShift'));
+  });
+
   test('editing the schedule mid-week neither counts nor celebrates', () async {
     final c = await create();
     now = DateTime(2026, 10, 23, 12); // Friday noon

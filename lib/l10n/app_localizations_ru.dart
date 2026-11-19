@@ -212,6 +212,83 @@ class AppLocalizationsRu extends AppLocalizations {
   String get perDayHours => 'Разное время по дням';
 
   @override
+  String get scheduleWeekly => 'По дням недели';
+
+  @override
+  String get scheduleRotation => 'Сменный';
+
+  @override
+  String get rotationHeader => 'Смены';
+
+  @override
+  String get rotationHint => 'Смены идут по кругу, независимо от дня недели';
+
+  @override
+  String get rotationPattern => 'График';
+
+  @override
+  String rotationName(String preset) {
+    String _temp0 = intl.Intl.selectLogic(preset, {
+      'twoTwo': '2 через 2',
+      'threeThree': '3 через 3',
+      'fourFour': '4 через 4',
+      'dayNight': 'День/ночь',
+      'dayTwoOff': 'Сутки через двое',
+      'dayThreeOff': 'Сутки через трое',
+      'other': 'Свой',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String rotationAbout(String preset) {
+    String _temp0 = intl.Intl.selectLogic(preset, {
+      'twoTwo': '2 рабочих дня, 2 выходных',
+      'threeThree': '3 рабочих дня, 3 выходных',
+      'fourFour': '4 рабочих дня, 4 выходных',
+      'dayNight': 'День, ночь, отсыпной, выходной',
+      'dayTwoOff': 'Сутки на работе, двое дома',
+      'dayThreeOff': 'Сутки на работе, трое дома',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get rotationToday => 'Сегодня';
+
+  @override
+  String rotationWorkday(int n) {
+    return 'Рабочий день $n';
+  }
+
+  @override
+  String rotationDayOff(int n) {
+    return 'Выходной $n';
+  }
+
+  @override
+  String get rotationShift => 'Смена';
+
+  @override
+  String get rotationDayShift => 'Дневная смена';
+
+  @override
+  String get rotationNightShift => 'Ночная смена';
+
+  @override
+  String get rotationRoundTheClock => 'Сутки';
+
+  @override
+  String get rotationHolidaysOff => 'Праздники — выходные';
+
+  @override
+  String get rotationHolidaysOffHint => 'Обычно смены идут и в праздники';
+
+  @override
+  String get rotationNext => 'Ближайшие 2 недели';
+
+  @override
   String get addWidget => 'Добавить виджет на экран';
 
   @override

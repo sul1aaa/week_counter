@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:week_counter/app.dart';
 import 'package:week_counter/core/calendar_date.dart';
+import 'package:week_counter/domain/countdown_engine.dart';
+import 'package:week_counter/models/work_schedule.dart';
 import 'package:week_counter/services/holiday_api.dart';
 import 'package:week_counter/services/holiday_repository.dart';
 import 'package:week_counter/services/local_store.dart';
@@ -101,6 +103,13 @@ void main() {
     await tester.tap(find.byTooltip('Schedule'));
     await tester.pumpAndSettle();
     expect(find.text('Week starts'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Vacation'),
+      200,
+      scrollable: find.byWidgetPredicate(
+        (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+      ),
+    );
     expect(find.text('Vacation'), findsOneWidget);
   });
 
@@ -133,6 +142,52 @@ void main() {
     expect(find.textContaining('of the week done'), findsOneWidget);
   });
 
+  testWidgets('switches the schedule to a rotation and back', (tester) async {
+    reduceMotion(tester);
+    final controller = await createController();
+    await tester.pumpWidget(
+      WeekCounterApp(controller: controller, locale: const Locale('en')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Schedule'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Rotation'));
+    await tester.pumpAndSettle();
+    expect(
+      controller.settings.schedule.rotation!.preset,
+      RotationPreset.twoTwo,
+    );
+    expect(find.text('2/2'), findsOneWidget);
+    expect(find.text('Workday 1'), findsOneWidget);
+    expect(find.text('Week starts'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('rotation.pattern')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Day/night'));
+    await tester.pumpAndSettle();
+    expect(
+      controller.settings.schedule.rotation!.preset,
+      RotationPreset.dayNight,
+    );
+    expect(find.text('Night shift'), findsOneWidget);
+
+    // Today is the first day off, after last night's shift.
+    await tester.tap(find.byKey(const ValueKey('rotation.today')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('choice.2')));
+    await tester.pumpAndSettle();
+    expect(find.text('Day off 1'), findsOneWidget);
+    expect(controller.snapshot.state, isA<OffNow>());
+    expect(controller.celebrationDue, isNull);
+
+    await tester.tap(find.text('Weekdays'));
+    await tester.pumpAndSettle();
+    expect(controller.settings.schedule.rotation, isNull);
+    expect(find.text('Week starts'), findsOneWidget);
+    expect(controller.snapshot.state, isA<CountingDown>());
+  });
+
   testWidgets('the vacation orb holds still when motion is reduced', (
     tester,
   ) async {
@@ -144,7 +199,13 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Schedule'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Vacation'));
+    await tester.scrollUntilVisible(
+      find.text('Vacation'),
+      200,
+      scrollable: find.byWidgetPredicate(
+        (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Vacation'));
     // Settles only if nothing on the screen loops.

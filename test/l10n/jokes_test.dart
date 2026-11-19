@@ -89,6 +89,31 @@ void main() {
     );
   });
 
+  test('a rotation has no weekday lines', () {
+    final twoTwo = WorkSchedule.standard.copyWith(
+      rotation: () => ShiftRotation(
+        cycle: RotationPreset.twoTwo.cycle,
+        start: const CalendarDate(2026, 10, 19),
+      ),
+    );
+    // Monday morning, the first shift of two.
+    expect(poolsAt(DateTime(2026, 10, 19, 9, 30), twoTwo), [JokePool.work]);
+    expect(poolsAt(DateTime(2026, 10, 20, 12), twoTwo), [JokePool.lastDay]);
+  });
+
+  test("a rotation's night shift gets the night lines", () {
+    final dayNight = WorkSchedule.standard.copyWith(
+      rotation: () => ShiftRotation(
+        cycle: RotationPreset.dayNight.cycle,
+        start: const CalendarDate(2026, 10, 19),
+      ),
+    );
+    expect(poolsAt(DateTime(2026, 10, 20, 21), dayNight), [
+      JokePool.night,
+      JokePool.lastDay,
+    ]);
+  });
+
   test('a Tuesday–Saturday week ends on Saturday, not Friday', () {
     final tueSat = WorkSchedule.standard.copyWith(workdays: {2, 3, 4, 5, 6});
     expect(poolsAt(DateTime(2026, 10, 23, 12), tueSat), [JokePool.work]);
