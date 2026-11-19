@@ -375,7 +375,7 @@ class AppController extends ChangeNotifier {
       )) {
         give('shortWeek', start);
       }
-      if (_settings.schedule.shiftFor(lastWorkday.weekday).isOvernight) {
+      if (_settings.schedule.shiftOn(lastWorkday).isOvernight) {
         give('nightShift', start);
       }
     }

@@ -207,6 +207,85 @@ class AppLocalizationsEn extends AppLocalizations {
   String get perDayHours => 'Different hours per day';
 
   @override
+  String get scheduleWeekly => 'Weekdays';
+
+  @override
+  String get scheduleRotation => 'Rotation';
+
+  @override
+  String get rotationHeader => 'Shifts';
+
+  @override
+  String get rotationHint =>
+      'Shifts repeat in a cycle, whatever the day of the week';
+
+  @override
+  String get rotationPattern => 'Pattern';
+
+  @override
+  String rotationName(String preset) {
+    String _temp0 = intl.Intl.selectLogic(preset, {
+      'twoTwo': '2/2',
+      'threeThree': '3/3',
+      'fourFour': '4/4',
+      'dayNight': 'Day/night',
+      'dayTwoOff': '24/48',
+      'dayThreeOff': '24/72',
+      'other': 'Custom',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String rotationAbout(String preset) {
+    String _temp0 = intl.Intl.selectLogic(preset, {
+      'twoTwo': '2 days on, 2 days off',
+      'threeThree': '3 days on, 3 days off',
+      'fourFour': '4 days on, 4 days off',
+      'dayNight': 'A day shift, a night shift, 2 days off',
+      'dayTwoOff': '24 hours on, 2 days off',
+      'dayThreeOff': '24 hours on, 3 days off',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get rotationToday => 'Today is';
+
+  @override
+  String rotationWorkday(int n) {
+    return 'Workday $n';
+  }
+
+  @override
+  String rotationDayOff(int n) {
+    return 'Day off $n';
+  }
+
+  @override
+  String get rotationShift => 'Shift';
+
+  @override
+  String get rotationDayShift => 'Day shift';
+
+  @override
+  String get rotationNightShift => 'Night shift';
+
+  @override
+  String get rotationRoundTheClock => '24 hours';
+
+  @override
+  String get rotationHolidaysOff => 'Holidays are days off';
+
+  @override
+  String get rotationHolidaysOffHint =>
+      'Most rotations run through public holidays';
+
+  @override
+  String get rotationNext => 'Next 2 weeks';
+
+  @override
   String get addWidget => 'Add widget to home screen';
 
   @override

@@ -26,6 +26,7 @@ class DayInfo {
     this.reasons = const {},
     this.holidays = const [],
     this.override,
+    this.isExtraWorkday = false,
   });
 
   final CalendarDate date;
@@ -33,7 +34,8 @@ class DayInfo {
   final bool isScheduledWorkday;
   final Set<OffReason> reasons;
 
-  /// Holidays on this day, including ones a workday override cancels.
+  /// Holidays on this day, including ones a workday override cancels and
+  /// ones a rotation works through.
   final List<Holiday> holidays;
   final DayOverride? override;
 
@@ -43,8 +45,7 @@ class DayInfo {
   bool get isExtraOff => isOff && !reasons.contains(OffReason.scheduled);
 
   /// Forced workday on what would otherwise be a day off.
-  bool get isExtraWorkday =>
-      isWork && (!isScheduledWorkday || holidays.isNotEmpty);
+  final bool isExtraWorkday;
 }
 
 class DayClassifier {
@@ -65,8 +66,9 @@ class DayClassifier {
 
   DayInfo _classify(CalendarDate date) {
     final holidays = _holidays[date] ?? const <Holiday>[];
-    final scheduled = schedule.isScheduledWorkday(date.weekday);
+    final scheduled = schedule.isScheduledWorkday(date);
     final override = overrides[date];
+    final holidayOff = holidays.isNotEmpty && schedule.holidaysOff;
 
     DayInfo off(Set<OffReason> reasons) => DayInfo(
       date: date,
@@ -85,16 +87,19 @@ class DayClassifier {
           isScheduledWorkday: scheduled,
           holidays: holidays,
           override: override,
+          isExtraWorkday: !scheduled || holidayOff,
         );
       case OverrideKind.dayOff:
-        return off({
-          OffReason.custom,
-          if (holidays.isNotEmpty) OffReason.publicHoliday,
-        });
+        return off({OffReason.custom, if (holidayOff) OffReason.publicHoliday});
       case null:
-        if (holidays.isNotEmpty) return off({OffReason.publicHoliday});
+        if (holidayOff) return off({OffReason.publicHoliday});
         if (!scheduled) return off({});
-        return DayInfo(date: date, isOff: false, isScheduledWorkday: true);
+        return DayInfo(
+          date: date,
+          isOff: false,
+          isScheduledWorkday: true,
+          holidays: holidays,
+        );
     }
   }
 }

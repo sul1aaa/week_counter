@@ -337,7 +337,7 @@ class CountdownEngine {
     final hasForcedWorkdays = classifier.overrides.entries.any(
       (e) => e.value.kind == OverrideKind.workday && e.key >= today,
     );
-    if (schedule.workdays.isEmpty && !hasForcedWorkdays) {
+    if (!schedule.hasWorkdays && !hasForcedWorkdays) {
       return CountdownSnapshot(
         computedAt: now,
         state: const NoWorkdays(),

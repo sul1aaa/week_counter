@@ -195,6 +195,7 @@ List<String> jokeLines(String localeName, JokePool pool) =>
     (localeName.startsWith('ru') ? _ru : _en)[pool]!;
 
 bool _isFiveDay(WorkSchedule schedule) =>
+    schedule.rotation == null &&
     schedule.workdays.length == 5 &&
     schedule.workdays.every((d) => d <= DateTime.friday);
 
@@ -233,11 +234,11 @@ List<JokePool> jokePools(
         return [JokePool.lastHour];
       }
       final lastShiftDay = block.first.addDays(-1);
-      final overnight = schedule.shiftFor(lastShiftDay.weekday).isOvernight;
+      final overnight = schedule.shiftOn(lastShiftDay).isOvernight;
       final lastDay =
           today == lastShiftDay || (overnight && today == block.first);
       return [
-        if (schedule.shiftFor(today.weekday).isOvernight) JokePool.night,
+        if (schedule.shiftOn(today).isOvernight) JokePool.night,
         if (lastDay)
           five && now.weekday == DateTime.friday
               ? JokePool.fri

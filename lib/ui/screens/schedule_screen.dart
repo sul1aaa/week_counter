@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/calendar_date.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/labels.dart';
 import '../../models/work_schedule.dart';
@@ -13,6 +14,7 @@ import '../kit/glass.dart';
 import '../kit/group.dart';
 import '../kit/pressable.dart';
 import '../theme/tokens.dart';
+import '../widgets/rotation_controls.dart';
 import '../widgets/schedule_controls.dart';
 import '../widgets/widget_sheet.dart';
 import 'country_picker_screen.dart';
@@ -82,6 +84,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           final code = settings.countryCode;
           final weekdays = orderedWeekdays(context);
           final vacation = _controller.vacation;
+          final rotation = schedule.rotation;
+          final today = CalendarDate.fromDateTime(_controller.clock());
           return AppPage(
             title: l10n.scheduleTitle,
             subtitle: l10n.settingsSubtitle,
@@ -92,52 +96,90 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               onTap: () => Navigator.of(context).pop(),
             ),
             children: [
-              GroupHeader(l10n.weekHeader),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: DaysPicker(
-                  weekdays: weekdays,
-                  workdays: schedule.workdays,
-                  onToggle: (day) => _controller.updateSchedule(
-                    schedule.copyWith(
-                      workdays: schedule.workdays.contains(day)
-                          ? ({...schedule.workdays}..remove(day))
-                          : {...schedule.workdays, day},
-                    ),
-                  ),
+                child: Segmented<bool>(
+                  key: const ValueKey('schedule.mode'),
+                  segments: [
+                    (false, l10n.scheduleWeekly),
+                    (true, l10n.scheduleRotation),
+                  ],
+                  selected: rotation != null,
+                  onChanged: (rotating) {
+                    if (rotating == (rotation != null)) return;
+                    _controller.updateSchedule(
+                      schedule.copyWith(
+                        rotation: () => rotating
+                            ? ShiftRotation(
+                                cycle: RotationPreset.twoTwo.cycle,
+                                start: today,
+                              )
+                            : null,
+                      ),
+                    );
+                  },
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                child: Text(l10n.workdaysHint, style: t.footnote),
-              ),
-              Group(
-                children: [
-                  if (!schedule.hasCustomShifts)
-                    ...weekTimeRows(context, _controller),
-                  GroupRow(
-                    title: l10n.perDayHours,
-                    trailing: AppToggle(
-                      label: l10n.perDayHours,
-                      value: schedule.hasCustomShifts,
-                      onChanged: (on) => _controller.updateSchedule(
-                        schedule.copyWith(
-                          customShifts: on
-                              ? {
-                                  for (final d in weekdays)
-                                    d: schedule.defaultShift,
-                                }
-                              : {},
-                        ),
+              if (rotation != null) ...[
+                GroupHeader(l10n.rotationHeader),
+                Group(children: rotationRows(context, _controller, rotation)),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 8, 32, 0),
+                  child: Text(l10n.rotationHint, style: t.footnote),
+                ),
+                GroupHeader(l10n.rotationNext),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: RotationPreview(rotation: rotation, today: today),
+                ),
+              ] else ...[
+                GroupHeader(l10n.weekHeader),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: DaysPicker(
+                    weekdays: weekdays,
+                    workdays: schedule.workdays,
+                    onToggle: (day) => _controller.updateSchedule(
+                      schedule.copyWith(
+                        workdays: schedule.workdays.contains(day)
+                            ? ({...schedule.workdays}..remove(day))
+                            : {...schedule.workdays, day},
                       ),
                     ),
                   ),
-                  if (schedule.hasCustomShifts)
-                    for (final day in weekdays)
-                      if (schedule.workdays.contains(day))
-                        _perDayRow(l10n, day, schedule.shiftFor(day)),
-                ],
-              ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  child: Text(l10n.workdaysHint, style: t.footnote),
+                ),
+                Group(
+                  children: [
+                    if (!schedule.hasCustomShifts)
+                      ...weekTimeRows(context, _controller),
+                    GroupRow(
+                      title: l10n.perDayHours,
+                      trailing: AppToggle(
+                        label: l10n.perDayHours,
+                        value: schedule.hasCustomShifts,
+                        onChanged: (on) => _controller.updateSchedule(
+                          schedule.copyWith(
+                            customShifts: on
+                                ? {
+                                    for (final d in weekdays)
+                                      d: schedule.defaultShift,
+                                  }
+                                : {},
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (schedule.hasCustomShifts)
+                      for (final day in weekdays)
+                        if (schedule.workdays.contains(day))
+                          _perDayRow(l10n, day, schedule.shiftFor(day)),
+                  ],
+                ),
+              ],
               GroupHeader(l10n.navCalendar),
               Group(
                 children: [

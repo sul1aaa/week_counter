@@ -440,6 +440,108 @@ abstract class AppLocalizations {
   /// **'Different hours per day'**
   String get perDayHours;
 
+  /// No description provided for @scheduleWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekdays'**
+  String get scheduleWeekly;
+
+  /// No description provided for @scheduleRotation.
+  ///
+  /// In en, this message translates to:
+  /// **'Rotation'**
+  String get scheduleRotation;
+
+  /// No description provided for @rotationHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Shifts'**
+  String get rotationHeader;
+
+  /// No description provided for @rotationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Shifts repeat in a cycle, whatever the day of the week'**
+  String get rotationHint;
+
+  /// No description provided for @rotationPattern.
+  ///
+  /// In en, this message translates to:
+  /// **'Pattern'**
+  String get rotationPattern;
+
+  /// No description provided for @rotationName.
+  ///
+  /// In en, this message translates to:
+  /// **'{preset, select, twoTwo{2/2} threeThree{3/3} fourFour{4/4} dayNight{Day/night} dayTwoOff{24/48} dayThreeOff{24/72} other{Custom}}'**
+  String rotationName(String preset);
+
+  /// No description provided for @rotationAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'{preset, select, twoTwo{2 days on, 2 days off} threeThree{3 days on, 3 days off} fourFour{4 days on, 4 days off} dayNight{A day shift, a night shift, 2 days off} dayTwoOff{24 hours on, 2 days off} dayThreeOff{24 hours on, 3 days off} other{}}'**
+  String rotationAbout(String preset);
+
+  /// No description provided for @rotationToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today is'**
+  String get rotationToday;
+
+  /// No description provided for @rotationWorkday.
+  ///
+  /// In en, this message translates to:
+  /// **'Workday {n}'**
+  String rotationWorkday(int n);
+
+  /// No description provided for @rotationDayOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Day off {n}'**
+  String rotationDayOff(int n);
+
+  /// No description provided for @rotationShift.
+  ///
+  /// In en, this message translates to:
+  /// **'Shift'**
+  String get rotationShift;
+
+  /// No description provided for @rotationDayShift.
+  ///
+  /// In en, this message translates to:
+  /// **'Day shift'**
+  String get rotationDayShift;
+
+  /// No description provided for @rotationNightShift.
+  ///
+  /// In en, this message translates to:
+  /// **'Night shift'**
+  String get rotationNightShift;
+
+  /// No description provided for @rotationRoundTheClock.
+  ///
+  /// In en, this message translates to:
+  /// **'24 hours'**
+  String get rotationRoundTheClock;
+
+  /// No description provided for @rotationHolidaysOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Holidays are days off'**
+  String get rotationHolidaysOff;
+
+  /// No description provided for @rotationHolidaysOffHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Most rotations run through public holidays'**
+  String get rotationHolidaysOffHint;
+
+  /// No description provided for @rotationNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next 2 weeks'**
+  String get rotationNext;
+
   /// No description provided for @addWidget.
   ///
   /// In en, this message translates to:

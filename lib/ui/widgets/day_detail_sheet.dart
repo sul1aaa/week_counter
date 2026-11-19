@@ -115,7 +115,7 @@ class _DayDetailSheetState extends State<_DayDetailSheet> {
                       holiday.localName
                     else if (holiday.name != l10n.holidayName(holiday))
                       holiday.name,
-                    if (info.isWork) l10n.holidayIgnored,
+                    if (info.isExtraWorkday) l10n.holidayIgnored,
                   ].join('\n').orNull,
                 ),
             ],
