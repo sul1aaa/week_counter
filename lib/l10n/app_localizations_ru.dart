@@ -685,6 +685,53 @@ class AppLocalizationsRu extends AppLocalizations {
       'Если в настройках телефона отключена анимация, покажем открытку без анимации';
 
   @override
+  String get moneyHeader => 'Деньги';
+
+  @override
+  String get moneyTicker => 'Счётчик денег';
+
+  @override
+  String get moneyTickerHint =>
+      'Шар дня покажет, сколько вы заработали за смену';
+
+  @override
+  String get payTitle => 'Зарплата';
+
+  @override
+  String payPerHour(String amount) {
+    return '$amount в час';
+  }
+
+  @override
+  String payPerMonth(String amount) {
+    return '$amount в месяц';
+  }
+
+  @override
+  String get payPeriodHour => 'В час';
+
+  @override
+  String get payPeriodMonth => 'В месяц';
+
+  @override
+  String get payAmountHint => 'Сумма';
+
+  @override
+  String get payCurrencyHint => 'Валюта';
+
+  @override
+  String get payMonthNote =>
+      'Месячная зарплата делится на рабочие часы месяца, без праздников и выходных.';
+
+  @override
+  String get payHourNote => 'Считается за каждую минуту смены.';
+
+  @override
+  String moneyEarnedToday(String amount) {
+    return '$amount за сегодня';
+  }
+
+  @override
   String weeksCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

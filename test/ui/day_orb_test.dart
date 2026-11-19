@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:week_counter/domain/countdown_engine.dart';
+import 'package:week_counter/domain/earnings.dart';
 import 'package:week_counter/l10n/app_localizations.dart';
 import 'package:week_counter/ui/kit/orb.dart';
 import 'package:week_counter/ui/theme/tokens.dart';
@@ -20,6 +21,7 @@ void main() {
     DayShift? shift,
     DateTime now, {
     String locale = 'en',
+    Earned? earned,
   }) async {
     tester.platformDispatcher.accessibilityFeaturesTestValue =
         const FakeAccessibilityFeatures(disableAnimations: true);
@@ -32,7 +34,7 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: Center(
-            child: DayOrb(shift: shift, now: now, size: 200),
+            child: DayOrb(shift: shift, now: now, size: 200, earned: earned),
           ),
         ),
       ),
@@ -71,6 +73,21 @@ void main() {
     expect(find.text('Day off'), findsOneWidget);
     expect(find.text('no shift today'), findsOneWidget);
     expect(orb(tester).mode, OrbMode.paused);
+  });
+
+  testWidgets('says nothing about money unless asked', (tester) async {
+    await pump(tester, shift, DateTime(2026, 10, 21, 13, 30));
+    expect(find.textContaining('earned today'), findsNothing);
+  });
+
+  testWidgets('shows the money earned so far', (tester) async {
+    await pump(
+      tester,
+      shift,
+      DateTime(2026, 10, 21, 13, 30),
+      earned: const Earned(amount: 4500.7, perHour: 1000, currency: '₸'),
+    );
+    expect(find.text('₸4,500 earned today'), findsOneWidget);
   });
 
   testWidgets('speaks Russian', (tester) async {

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/calendar_date.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/labels.dart';
+import '../../models/pay.dart';
 import '../../models/work_schedule.dart';
 import '../../state/app_controller.dart';
 import '../kit/app_page.dart';
@@ -14,6 +15,7 @@ import '../kit/glass.dart';
 import '../kit/group.dart';
 import '../kit/pressable.dart';
 import '../theme/tokens.dart';
+import '../widgets/pay_sheet.dart';
 import '../widgets/rotation_controls.dart';
 import '../widgets/schedule_controls.dart';
 import '../widgets/widget_sheet.dart';
@@ -205,6 +207,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   ),
                 ],
               ),
+              GroupHeader(l10n.moneyHeader),
+              _moneySection(l10n),
               GroupHeader(l10n.sectionExtras),
               _extrasSection(l10n),
               GroupHeader(l10n.sectionAbout),
@@ -281,6 +285,64 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         },
       ),
     );
+  }
+
+  Widget _moneySection(AppLocalizations l10n) {
+    final pay = _controller.settings.pay;
+    return Group(
+      children: [
+        GroupRow(
+          icon: Icons.payments_rounded,
+          title: l10n.moneyTicker,
+          subtitle: l10n.moneyTickerHint,
+          trailing: AppToggle(
+            label: l10n.moneyTicker,
+            value: pay?.on ?? false,
+            onChanged: (on) => on
+                ? _turnOnMoney(l10n)
+                : _controller.setPay(pay!.copyWith(on: false)),
+          ),
+        ),
+        if (pay != null && pay.on)
+          GroupRow(
+            title: l10n.payTitle,
+            value: _payLabel(l10n, pay),
+            onTap: () => _editPay(pay),
+          ),
+      ],
+    );
+  }
+
+  /// "400 000 ₸ a month", "$12.50 an hour".
+  String _payLabel(AppLocalizations l10n, Pay pay) {
+    final amount = l10n.money(
+      pay.amount,
+      pay.currency,
+      cents: pay.amount != pay.amount.truncateToDouble(),
+    );
+    return switch (pay.period) {
+      PayPeriod.hour => l10n.payPerHour(amount),
+      PayPeriod.month => l10n.payPerMonth(amount),
+    };
+  }
+
+  /// Turns the ticker on, asking for the pay the first time.
+  Future<void> _turnOnMoney(AppLocalizations l10n) {
+    final pay =
+        _controller.settings.pay ??
+        Pay(
+          currency: guessCurrency(
+            _controller.settings.countryCode,
+            l10n.localeName,
+          ),
+        );
+    if (pay.amount > 0) return _controller.setPay(pay.copyWith(on: true));
+    return _editPay(pay);
+  }
+
+  Future<void> _editPay(Pay pay) async {
+    final entered = await showPaySheet(context, pay);
+    if (entered != null) await _controller.setPay(entered);
   }
 
   Widget _extrasSection(AppLocalizations l10n) {

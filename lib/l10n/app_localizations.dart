@@ -1136,6 +1136,84 @@ abstract class AppLocalizations {
   /// **'With animations off in Settings, you get a still card instead'**
   String get confettiHintAndroid;
 
+  /// No description provided for @moneyHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Money'**
+  String get moneyHeader;
+
+  /// No description provided for @moneyTicker.
+  ///
+  /// In en, this message translates to:
+  /// **'Money ticker'**
+  String get moneyTicker;
+
+  /// No description provided for @moneyTickerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The day orb shows what you\'ve earned in today\'s shift'**
+  String get moneyTickerHint;
+
+  /// No description provided for @payTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay'**
+  String get payTitle;
+
+  /// No description provided for @payPerHour.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} an hour'**
+  String payPerHour(String amount);
+
+  /// No description provided for @payPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} a month'**
+  String payPerMonth(String amount);
+
+  /// No description provided for @payPeriodHour.
+  ///
+  /// In en, this message translates to:
+  /// **'Per hour'**
+  String get payPeriodHour;
+
+  /// No description provided for @payPeriodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Per month'**
+  String get payPeriodMonth;
+
+  /// No description provided for @payAmountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get payAmountHint;
+
+  /// No description provided for @payCurrencyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get payCurrencyHint;
+
+  /// No description provided for @payMonthNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A monthly salary is spread over the work hours of each month, without holidays and days off.'**
+  String get payMonthNote;
+
+  /// No description provided for @payHourNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Counted for every minute of your shifts.'**
+  String get payHourNote;
+
+  /// No description provided for @moneyEarnedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} earned today'**
+  String moneyEarnedToday(String amount);
+
   /// No description provided for @weeksCount.
   ///
   /// In en, this message translates to:

@@ -14,7 +14,9 @@ import 'package:week_counter/services/prefs_repository.dart';
 import 'package:week_counter/services/settings_repository.dart';
 import 'package:week_counter/services/widget_sync.dart';
 import 'package:week_counter/state/app_controller.dart';
+import 'package:week_counter/ui/kit/controls.dart';
 import 'package:week_counter/ui/kit/glass.dart';
+import 'package:week_counter/ui/kit/group.dart';
 import 'package:week_counter/ui/screens/vacation_screen.dart';
 import 'package:week_counter/ui/widgets/day_orb.dart';
 import 'package:week_counter/ui/widgets/joke_carousel.dart';
@@ -186,6 +188,53 @@ void main() {
     expect(controller.settings.schedule.rotation, isNull);
     expect(find.text('Week starts'), findsOneWidget);
     expect(controller.snapshot.state, isA<CountingDown>());
+  });
+
+  testWidgets('the money ticker shows on the day orb once turned on', (
+    tester,
+  ) async {
+    reduceMotion(tester);
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    now = DateTime(2026, 10, 21, 13, 30);
+    final controller = await createController();
+    await tester.pumpWidget(
+      WeekCounterApp(controller: controller, locale: const Locale('en')),
+    );
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(PageView), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('until the end of the shift at 18:00'), findsOneWidget);
+    expect(find.textContaining('earned today'), findsNothing);
+
+    await tester.tap(find.byTooltip('Schedule'));
+    await tester.pumpAndSettle();
+    final toggle = find.descendant(
+      of: find.widgetWithText(GroupRow, 'Money ticker'),
+      matching: find.byType(AppToggle),
+    );
+    await tester.scrollUntilVisible(toggle, 200);
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    // The first time it asks for the pay, in the currency of the country.
+    expect(find.text('Per month'), findsOneWidget);
+    await tester.tap(find.text('Per hour'));
+    await tester.enterText(find.byKey(const ValueKey('pay.amount')), '1 000');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.text('₽1,000 an hour'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+    final money = find.text('₽4,500 earned today');
+    expect(money, findsOneWidget);
+    // The pager grows to fit the line instead of cutting it off.
+    expect(
+      tester.getRect(money).bottom,
+      lessThanOrEqualTo(tester.getRect(find.byType(PageView)).bottom),
+    );
   });
 
   testWidgets('the vacation orb holds still when motion is reduced', (

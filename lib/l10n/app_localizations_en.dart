@@ -674,6 +674,53 @@ class AppLocalizationsEn extends AppLocalizations {
       'With animations off in Settings, you get a still card instead';
 
   @override
+  String get moneyHeader => 'Money';
+
+  @override
+  String get moneyTicker => 'Money ticker';
+
+  @override
+  String get moneyTickerHint =>
+      'The day orb shows what you\'ve earned in today\'s shift';
+
+  @override
+  String get payTitle => 'Pay';
+
+  @override
+  String payPerHour(String amount) {
+    return '$amount an hour';
+  }
+
+  @override
+  String payPerMonth(String amount) {
+    return '$amount a month';
+  }
+
+  @override
+  String get payPeriodHour => 'Per hour';
+
+  @override
+  String get payPeriodMonth => 'Per month';
+
+  @override
+  String get payAmountHint => 'Amount';
+
+  @override
+  String get payCurrencyHint => 'Currency';
+
+  @override
+  String get payMonthNote =>
+      'A monthly salary is spread over the work hours of each month, without holidays and days off.';
+
+  @override
+  String get payHourNote => 'Counted for every minute of your shifts.';
+
+  @override
+  String moneyEarnedToday(String amount) {
+    return '$amount earned today';
+  }
+
+  @override
   String weeksCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
