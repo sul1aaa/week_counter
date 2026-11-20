@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 
 import '../core/calendar_date.dart';
-import 'countdown.dart';
 import 'pay.dart';
 import 'work_schedule.dart';
 
@@ -38,7 +37,6 @@ class AppSettings {
     this.countryCode,
     this.schedule = WorkSchedule.standard,
     this.overrides = const {},
-    this.countdowns = const [],
     this.pay,
   });
 
@@ -52,10 +50,6 @@ class AppSettings {
           e.value as Map<String, dynamic>,
         ),
     },
-    countdowns: [
-      for (final c in json['countdowns'] as List? ?? const [])
-        Countdown.fromJson(c as Map<String, dynamic>),
-    ],
     pay: json['pay'] == null
         ? null
         : Pay.fromJson(json['pay'] as Map<String, dynamic>),
@@ -66,8 +60,6 @@ class AppSettings {
   final WorkSchedule schedule;
   final Map<CalendarDate, DayOverride> overrides;
 
-  /// The user's own events, in the order they were added.
-  final List<Countdown> countdowns;
   /// For the money ticker; null until the user first turns it on.
   final Pay? pay;
 
@@ -75,13 +67,11 @@ class AppSettings {
     ValueGetter<String?>? countryCode,
     WorkSchedule? schedule,
     Map<CalendarDate, DayOverride>? overrides,
-    List<Countdown>? countdowns,
     Pay? pay,
   }) => AppSettings(
     countryCode: countryCode != null ? countryCode() : this.countryCode,
     schedule: schedule ?? this.schedule,
     overrides: overrides ?? this.overrides,
-    countdowns: countdowns ?? this.countdowns,
     pay: pay ?? this.pay,
   );
 
@@ -91,7 +81,6 @@ class AppSettings {
     'overrides': {
       for (final e in overrides.entries) e.key.toIso(): e.value.toJson(),
     },
-    'countdowns': [for (final c in countdowns) c.toJson()],
     if (pay != null) 'pay': pay!.toJson(),
   };
 }
