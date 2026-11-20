@@ -63,8 +63,8 @@ class AppController extends ChangeNotifier {
   late CountdownSnapshot _snapshot;
   String? _freshAward;
 
-  /// Work hours per (year, month), for spreading a monthly salary.
-  final Map<(int, int), double> _monthHours = {};
+  /// Work hours per pay span, for spreading pay per day, week or month.
+  final Map<(CalendarDate, CalendarDate), double> _spanHours = {};
 
   AppSettings get settings => _settings;
   HolidayCalendar get holidays => _holidays;
@@ -143,12 +143,14 @@ class AppController extends ChangeNotifier {
     final pay = _settings.pay;
     final shift = _snapshot.dayShift;
     if (pay == null || !pay.ticks || shift == null) return null;
-    // An overnight shift belongs to the day, and month, it starts on.
-    final day = CalendarDate.fromDateTime(shift.start);
-    final hours = _monthHours.putIfAbsent((
-      day.year,
-      day.month,
-    ), () => monthWorkHours(_engine.classifier, day));
+    // An overnight shift belongs to the day, week and month it starts on.
+    final span = paySpan(pay.period, CalendarDate.fromDateTime(shift.start));
+    final hours = span == null
+        ? 0.0
+        : _spanHours.putIfAbsent(
+            (span.first, span.last),
+            () => workHours(_engine.classifier, span.first, span.last),
+          );
     final perHour = hourlyRate(pay, hours);
     return Earned(
       amount: earnedIn(shift, now, perHour),
@@ -478,7 +480,7 @@ class AppController extends ChangeNotifier {
         overrides: _settings.overrides,
       ),
     );
-    _monthHours.clear();
+    _spanHours.clear();
     _snapshot = _engine.snapshot(clock());
     notifyListeners();
     unawaited(_pushWidget());

@@ -322,6 +322,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
     return switch (pay.period) {
       PayPeriod.hour => l10n.payPerHour(amount),
+      PayPeriod.day => l10n.payPerDay(amount),
+      PayPeriod.week => l10n.payPerWeek(amount),
+      PayPeriod.twoWeeks => l10n.payPerTwoWeeks(amount),
       PayPeriod.month => l10n.payPerMonth(amount),
     };
   }

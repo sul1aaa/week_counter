@@ -76,6 +76,9 @@ class _PaySheetState extends State<_PaySheet> {
         Segmented<PayPeriod>(
           segments: [
             (PayPeriod.hour, l10n.payPeriodHour),
+            (PayPeriod.day, l10n.payPeriodDay),
+            (PayPeriod.week, l10n.payPeriodWeek),
+            (PayPeriod.twoWeeks, l10n.payPeriodTwoWeeks),
             (PayPeriod.month, l10n.payPeriodMonth),
           ],
           selected: _period,
@@ -117,10 +120,13 @@ class _PaySheetState extends State<_PaySheet> {
         const SizedBox(height: 8),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Text(
-            _period == PayPeriod.month ? l10n.payMonthNote : l10n.payHourNote,
-            style: t.footnote,
-          ),
+          child: Text(switch (_period) {
+            PayPeriod.hour => l10n.payHourNote,
+            PayPeriod.day => l10n.payDayNote,
+            PayPeriod.week => l10n.payWeekNote,
+            PayPeriod.twoWeeks => l10n.payTwoWeeksNote,
+            PayPeriod.month => l10n.payMonthNote,
+          }, style: t.footnote),
         ),
         const SizedBox(height: 20),
         AppButton(

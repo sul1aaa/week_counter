@@ -1172,17 +1172,53 @@ abstract class AppLocalizations {
   /// **'{amount} a month'**
   String payPerMonth(String amount);
 
+  /// No description provided for @payPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} a day'**
+  String payPerDay(String amount);
+
+  /// No description provided for @payPerWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} a week'**
+  String payPerWeek(String amount);
+
+  /// No description provided for @payPerTwoWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} every 2 weeks'**
+  String payPerTwoWeeks(String amount);
+
   /// No description provided for @payPeriodHour.
   ///
   /// In en, this message translates to:
-  /// **'Per hour'**
+  /// **'Hour'**
   String get payPeriodHour;
 
   /// No description provided for @payPeriodMonth.
   ///
   /// In en, this message translates to:
-  /// **'Per month'**
+  /// **'Month'**
   String get payPeriodMonth;
+
+  /// No description provided for @payPeriodDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get payPeriodDay;
+
+  /// No description provided for @payPeriodWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get payPeriodWeek;
+
+  /// No description provided for @payPeriodTwoWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'2 weeks'**
+  String get payPeriodTwoWeeks;
 
   /// No description provided for @payAmountHint.
   ///
@@ -1207,6 +1243,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Counted for every minute of your shifts.'**
   String get payHourNote;
+
+  /// No description provided for @payDayNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A day\'s pay builds up over that day\'s shift.'**
+  String get payDayNote;
+
+  /// No description provided for @payWeekNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly pay is spread over the work hours of each week, Monday to Sunday, without holidays and days off.'**
+  String get payWeekNote;
+
+  /// No description provided for @payTwoWeeksNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Half goes to each week, Monday to Sunday, spread over its work hours without holidays and days off.'**
+  String get payTwoWeeksNote;
 
   /// No description provided for @moneyEarnedToday.
   ///

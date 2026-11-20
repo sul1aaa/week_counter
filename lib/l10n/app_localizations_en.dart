@@ -697,10 +697,34 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get payPeriodHour => 'Per hour';
+  String payPerDay(String amount) {
+    return '$amount a day';
+  }
 
   @override
-  String get payPeriodMonth => 'Per month';
+  String payPerWeek(String amount) {
+    return '$amount a week';
+  }
+
+  @override
+  String payPerTwoWeeks(String amount) {
+    return '$amount every 2 weeks';
+  }
+
+  @override
+  String get payPeriodHour => 'Hour';
+
+  @override
+  String get payPeriodMonth => 'Month';
+
+  @override
+  String get payPeriodDay => 'Day';
+
+  @override
+  String get payPeriodWeek => 'Week';
+
+  @override
+  String get payPeriodTwoWeeks => '2 weeks';
 
   @override
   String get payAmountHint => 'Amount';
@@ -714,6 +738,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payHourNote => 'Counted for every minute of your shifts.';
+
+  @override
+  String get payDayNote => 'A day\'s pay builds up over that day\'s shift.';
+
+  @override
+  String get payWeekNote =>
+      'Weekly pay is spread over the work hours of each week, Monday to Sunday, without holidays and days off.';
+
+  @override
+  String get payTwoWeeksNote =>
+      'Half goes to each week, Monday to Sunday, spread over its work hours without holidays and days off.';
 
   @override
   String moneyEarnedToday(String amount) {
