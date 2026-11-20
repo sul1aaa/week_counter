@@ -11,21 +11,17 @@ import '../../l10n/app_localizations.dart';
 import '../../l10n/award_copy.dart';
 import '../../l10n/jokes.dart';
 import '../../l10n/labels.dart';
-import '../../models/countdown.dart';
 import '../../state/app_controller.dart';
 import '../kit/app_page.dart';
 import '../kit/buttons.dart';
 import '../kit/controls.dart';
 import '../kit/countdown_text.dart';
 import '../kit/glass.dart';
-import '../kit/group.dart';
 import '../kit/orb.dart';
-import '../kit/pressable.dart';
 import '../kit/strike.dart';
 import '../kit/toast.dart';
 import '../root_shell.dart';
 import '../theme/tokens.dart';
-import '../widgets/countdown_sheet.dart';
 import '../widgets/day_orb.dart';
 import '../widgets/joke_carousel.dart';
 import '../widgets/week_strip.dart';
@@ -193,16 +189,6 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 24),
               JokeCarousel(lines: shown, onMore: () => _nextJoke(shown.length)),
             ],
-            _Countdowns(
-              countdowns: _controller.upcomingCountdowns,
-              now: now,
-              onAdd: () => showCountdownSheet(context, _controller),
-              onEdit: (countdown) => showCountdownSheet(
-                context,
-                _controller,
-                countdown: countdown,
-              ),
-            ),
             if (_showWidgetTip)
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -522,99 +508,6 @@ class _OrbSection extends StatelessWidget {
           height: 16,
           child: Text(caption, style: t.mono.copyWith(fontSize: 12)),
         ),
-      ],
-    );
-  }
-}
-
-/// The user's own countdowns, each ticking down to the start of its day.
-class _Countdowns extends StatelessWidget {
-  const _Countdowns({
-    required this.countdowns,
-    required this.now,
-    required this.onAdd,
-    required this.onEdit,
-  });
-
-  final List<Countdown> countdowns;
-  final DateTime now;
-  final VoidCallback onAdd;
-  final ValueChanged<Countdown> onEdit;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final t = context.tokens;
-    final today = CalendarDate.fromDateTime(now);
-    final timeStyle = TextStyle(
-      fontFamily: Fonts.display,
-      fontSize: 17,
-      height: 22 / 17,
-      fontWeight: FontWeight.w600,
-      letterSpacing: -0.34,
-      fontFeatures: Fonts.tabular,
-      color: t.ink,
-    );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SectionTitle(
-          l10n.countdownsTitle,
-          trailing: Pressable(
-            key: const ValueKey('countdown.add'),
-            onTap: onAdd,
-            scale: 0.9,
-            semanticLabel: l10n.countdownAdd,
-            child: Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: t.surface,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.add_rounded, size: 22, color: t.ink),
-            ),
-          ),
-        ),
-        if (countdowns.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: InlineCard(
-              icon: Icons.event_rounded,
-              title: l10n.countdownsEmptyTitle,
-              subtitle: l10n.countdownsEmptyBody,
-              onTap: onAdd,
-            ),
-          )
-        else
-          Group(
-            children: [
-              for (final countdown in countdowns)
-                GroupRow(
-                  key: ValueKey('countdown.${countdown.id}'),
-                  icon: Icons.event_rounded,
-                  title: countdown.title,
-                  subtitle: l10n.date(countdown.date),
-                  chevron: false,
-                  onTap: () => onEdit(countdown),
-                  trailing: countdown.date == today
-                      ? Text(
-                          l10n.today,
-                          style: timeStyle.copyWith(color: t.violetInk),
-                        )
-                      : Semantics(
-                          label: l10n.humanDuration(
-                            countdown.target.difference(now),
-                          ),
-                          excludeSemantics: true,
-                          child: Text(
-                            timerText(countdown.target.difference(now), l10n),
-                            style: timeStyle,
-                          ),
-                        ),
-                ),
-            ],
-          ),
       ],
     );
   }
