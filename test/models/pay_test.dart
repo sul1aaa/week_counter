@@ -16,6 +16,15 @@ void main() {
     expect(Pay.fromJson(saved), pay);
   });
 
+  test('every pay period survives a save', () {
+    for (final period in PayPeriod.values) {
+      final pay = Pay(on: true, period: period, amount: 100, currency: '₸');
+      final saved =
+          jsonDecode(jsonEncode(pay.toJson())) as Map<String, dynamic>;
+      expect(Pay.fromJson(saved), pay);
+    }
+  });
+
   test('settings keep the pay', () {
     const settings = AppSettings(pay: Pay(amount: 400000, currency: '₸'));
     final saved =

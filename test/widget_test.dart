@@ -218,8 +218,8 @@ void main() {
     await tester.tap(toggle);
     await tester.pumpAndSettle();
     // The first time it asks for the pay, in the currency of the country.
-    expect(find.text('Per month'), findsOneWidget);
-    await tester.tap(find.text('Per hour'));
+    expect(find.text('Month'), findsOneWidget);
+    await tester.tap(find.text('Hour'));
     await tester.enterText(find.byKey(const ValueKey('pay.amount')), '1 000');
     await tester.pumpAndSettle();
     await tester.tap(find.text('Save'));

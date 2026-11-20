@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
-enum PayPeriod { hour, month }
+enum PayPeriod { hour, day, week, twoWeeks, month }
 
 /// What the user earns, for the money ticker on the day orb.
 @immutable

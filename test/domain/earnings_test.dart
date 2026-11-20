@@ -41,6 +41,12 @@ DayClassifier classifier({
   overrides: overrides,
 );
 
+/// Work hours in the calendar month of [day].
+double monthWorkHours(DayClassifier classifier, CalendarDate day) {
+  final span = paySpan(PayPeriod.month, day)!;
+  return workHours(classifier, span.first, span.last);
+}
+
 // November 2026 starts on a Sunday and has 21 days from Monday to Friday.
 const november = CalendarDate(2026, 11, 18);
 const unityDay = CalendarDate(2026, 11, 4); // Wednesday
@@ -104,6 +110,41 @@ void main() {
     });
   });
 
+  group('pay spans', () {
+    test('are the day, its week from Monday or its month', () {
+      expect(paySpan(PayPeriod.hour, november), isNull);
+      expect(paySpan(PayPeriod.day, november), (
+        first: november,
+        last: november,
+      ));
+      const week = (
+        first: CalendarDate(2026, 11, 16),
+        last: CalendarDate(2026, 11, 22),
+      );
+      expect(paySpan(PayPeriod.week, november), week);
+      expect(paySpan(PayPeriod.week, week.first), week);
+      expect(paySpan(PayPeriod.week, week.last), week);
+      expect(paySpan(PayPeriod.twoWeeks, november), week);
+      expect(paySpan(PayPeriod.month, november), (
+        first: const CalendarDate(2026, 11, 1),
+        last: const CalendarDate(2026, 11, 30),
+      ));
+      expect(paySpan(PayPeriod.month, const CalendarDate(2026, 12, 31)), (
+        first: const CalendarDate(2026, 12, 1),
+        last: const CalendarDate(2026, 12, 31),
+      ));
+    });
+
+    test("a week's hours leave out its holiday", () {
+      final span = paySpan(PayPeriod.week, unityDay)!;
+      expect(workHours(classifier(), span.first, span.last), 5 * 9);
+      expect(
+        workHours(classifier(holidays: [unityDay]), span.first, span.last),
+        4 * 9,
+      );
+    });
+  });
+
   group('hourly rate', () {
     test('is the amount for hourly pay', () {
       expect(
@@ -118,6 +159,32 @@ void main() {
       // A holiday leaves fewer hours, so each pays more.
       expect(hourlyRate(pay, 20 * 9), 1050);
       expect(hourlyRate(pay, 0), 0);
+    });
+
+    test("gives a day's pay to that day's shift", () {
+      expect(
+        hourlyRate(const Pay(period: PayPeriod.day, amount: 9000), 9),
+        1000,
+      );
+    });
+
+    test('spreads weekly pay over the week, and half of two weeks', () {
+      expect(
+        hourlyRate(const Pay(period: PayPeriod.week, amount: 45000), 45),
+        1000,
+      );
+      expect(
+        hourlyRate(const Pay(period: PayPeriod.week, amount: 45000), 36),
+        1250,
+      );
+      expect(
+        hourlyRate(const Pay(period: PayPeriod.twoWeeks, amount: 90000), 45),
+        1000,
+      );
+      expect(
+        hourlyRate(const Pay(period: PayPeriod.twoWeeks, amount: 90000), 0),
+        0,
+      );
     });
   });
 
@@ -224,6 +291,36 @@ void main() {
       // Unity Day leaves 20.
       expect(c.earnedToday(now)!.perHour, 1050);
     });
+
+    test("earns a day's pay by the end of the shift", () async {
+      final c = await create();
+      await c.setPay(
+        const Pay(on: true, period: PayPeriod.day, amount: 9000, currency: '₸'),
+      );
+      expect(c.earnedToday(now)!.amount, 4500);
+      expect(c.earnedToday(DateTime(2026, 11, 18, 18))!.amount, 9000);
+    });
+
+    test(
+      'spreads pay every two weeks over the week, holidays left out',
+      () async {
+        now = DateTime(2026, 11, 5, 13, 30); // Thursday after Unity Day
+        final c = await create();
+        await c.setPay(
+          const Pay(
+            on: true,
+            period: PayPeriod.twoWeeks,
+            amount: 90000,
+            currency: '₸',
+          ),
+        );
+        // Half of it over five days of 9 hours.
+        expect(c.earnedToday(now)!.perHour, 1000);
+        await c.refreshHolidays();
+        // Unity Day leaves four.
+        expect(c.earnedToday(now)!.perHour, 1250);
+      },
+    );
 
     test('shows nothing on a day off', () async {
       now = DateTime(2026, 11, 21, 13, 30); // Saturday

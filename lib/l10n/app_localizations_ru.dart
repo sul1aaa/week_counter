@@ -683,10 +683,34 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get payPeriodHour => 'В час';
+  String payPerDay(String amount) {
+    return '$amount в день';
+  }
 
   @override
-  String get payPeriodMonth => 'В месяц';
+  String payPerWeek(String amount) {
+    return '$amount в неделю';
+  }
+
+  @override
+  String payPerTwoWeeks(String amount) {
+    return '$amount раз в 2 недели';
+  }
+
+  @override
+  String get payPeriodHour => 'Час';
+
+  @override
+  String get payPeriodMonth => 'Месяц';
+
+  @override
+  String get payPeriodDay => 'День';
+
+  @override
+  String get payPeriodWeek => 'Неделя';
+
+  @override
+  String get payPeriodTwoWeeks => '2 нед.';
 
   @override
   String get payAmountHint => 'Сумма';
@@ -700,6 +724,17 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get payHourNote => 'Считается за каждую минуту смены.';
+
+  @override
+  String get payDayNote => 'Дневная оплата набегает за смену этого дня.';
+
+  @override
+  String get payWeekNote =>
+      'Недельная оплата делится на рабочие часы каждой недели, с понедельника по воскресенье, без праздников и выходных.';
+
+  @override
+  String get payTwoWeeksNote =>
+      'На каждую неделю приходится половина, она делится на рабочие часы недели (пн–вс), без праздников и выходных.';
 
   @override
   String moneyEarnedToday(String amount) {

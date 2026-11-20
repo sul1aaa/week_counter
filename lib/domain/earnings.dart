@@ -5,16 +5,35 @@ import '../models/pay.dart';
 import 'countdown_engine.dart';
 import 'day_classifier.dart';
 
-/// Scheduled work hours in the calendar month of [day]. Holidays, vacation
-/// and other days off don't count.
-double monthWorkHours(DayClassifier classifier, CalendarDate day) {
+/// The days that pay per [period] is spread over, for a shift on [day]:
+/// the day itself, its week from Monday to Sunday, or its calendar month.
+/// Pay every two weeks goes half to each week. Null for hourly pay.
+({CalendarDate first, CalendarDate last})? paySpan(
+  PayPeriod period,
+  CalendarDate day,
+) => switch (period) {
+  PayPeriod.hour => null,
+  PayPeriod.day => (first: day, last: day),
+  PayPeriod.week || PayPeriod.twoWeeks => (
+    first: day.addDays(DateTime.monday - day.weekday),
+    last: day.addDays(DateTime.sunday - day.weekday),
+  ),
+  PayPeriod.month => (
+    first: CalendarDate(day.year, day.month, 1),
+    last: CalendarDate.fromDateTime(DateTime.utc(day.year, day.month + 1, 0)),
+  ),
+};
+
+/// Scheduled work hours from [first] to [last], both included. Holidays,
+/// vacation and other days off don't count.
+double workHours(
+  DayClassifier classifier,
+  CalendarDate first,
+  CalendarDate last,
+) {
   final schedule = classifier.schedule;
   var minutes = 0;
-  for (
-    var date = CalendarDate(day.year, day.month, 1);
-    date.month == day.month;
-    date = date.addDays(1)
-  ) {
+  for (var date = first; date <= last; date = date.addDays(1)) {
     if (classifier.classify(date).isOff) continue;
     minutes += schedule
         .shiftEndOn(date)
@@ -24,10 +43,13 @@ double monthWorkHours(DayClassifier classifier, CalendarDate day) {
   return minutes / 60;
 }
 
-/// Pay for one hour of work. A monthly salary is spread over [monthHours].
-double hourlyRate(Pay pay, double monthHours) => switch (pay.period) {
+/// Pay for one hour of work. Other pay is spread over the [spanHours] of
+/// work in its [paySpan].
+double hourlyRate(Pay pay, double spanHours) => switch (pay.period) {
   PayPeriod.hour => pay.amount,
-  PayPeriod.month => monthHours > 0 ? pay.amount / monthHours : 0,
+  _ when spanHours <= 0 => 0,
+  PayPeriod.twoWeeks => pay.amount / 2 / spanHours,
+  _ => pay.amount / spanHours,
 };
 
 /// Money earned in [shift] by [now] at [perHour]: nothing before it starts,
