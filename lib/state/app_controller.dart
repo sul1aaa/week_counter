@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
@@ -10,6 +11,7 @@ import '../domain/day_classifier.dart';
 import '../domain/widget_payload.dart';
 import '../l10n/app_localizations.dart';
 import '../models/app_settings.dart';
+import '../models/countdown.dart';
 import '../models/holiday.dart';
 import '../models/work_schedule.dart';
 import '../services/holiday_repository.dart';
@@ -158,6 +160,56 @@ class AppController extends ChangeNotifier {
     return setOverride([
       for (var d = from; d <= range.last; d = d.addDays(1)) d,
     ], null);
+  }
+
+  /// The user's countdowns that haven't passed, soonest first. One on today
+  /// stays until the day is over.
+  List<Countdown> get upcomingCountdowns {
+    final today = CalendarDate.fromDateTime(clock());
+    return [
+      for (final c in _settings.countdowns)
+        if (c.date >= today) c,
+    ]..sort(
+      (a, b) => a.date == b.date
+          ? a.title.compareTo(b.title)
+          : a.date.compareTo(b.date),
+    );
+  }
+
+  Future<void> addCountdown(String title, CalendarDate date) {
+    var id = 1;
+    for (final c in _settings.countdowns) {
+      id = math.max(id, (int.tryParse(c.id) ?? 0) + 1);
+    }
+    return _saveCountdowns([
+      ..._settings.countdowns,
+      Countdown(id: '$id', title: title, date: date),
+    ]);
+  }
+
+  /// Replaces the countdown with the same id.
+  Future<void> updateCountdown(Countdown countdown) => _saveCountdowns([
+    for (final c in _settings.countdowns) c.id == countdown.id ? countdown : c,
+  ]);
+
+  Future<void> removeCountdown(String id) => _saveCountdowns([
+    for (final c in _settings.countdowns)
+      if (c.id != id) c,
+  ]);
+
+  /// Saves [countdowns] without the ones already past. They don't change
+  /// the schedule, so the countdown, the awards and the widget stay as they
+  /// are.
+  Future<void> _saveCountdowns(List<Countdown> countdowns) {
+    final today = CalendarDate.fromDateTime(clock());
+    _settings = _settings.copyWith(
+      countdowns: [
+        for (final c in countdowns)
+          if (c.date >= today) c,
+      ],
+    );
+    notifyListeners();
+    return _settingsRepository.save(_settings);
   }
 
   Future<void> dismissWidgetTip() =>

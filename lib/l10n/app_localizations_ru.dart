@@ -486,6 +486,31 @@ class AppLocalizationsRu extends AppLocalizations {
   String get jokesMore => 'Другие фразы';
 
   @override
+  String get countdownsTitle => 'Обратный отсчёт';
+
+  @override
+  String get countdownsEmptyTitle => 'Считайте дни до своих событий';
+
+  @override
+  String get countdownsEmptyBody =>
+      'Поездка, день рождения, конец испытательного срока';
+
+  @override
+  String get countdownAdd => 'Добавить отсчёт';
+
+  @override
+  String get countdownNew => 'Новый отсчёт';
+
+  @override
+  String get countdownEdit => 'Изменить отсчёт';
+
+  @override
+  String get countdownTitleHint => 'Чего ждёте?';
+
+  @override
+  String get countdownDelete => 'Удалить';
+
+  @override
   String get hintCountryTitle => 'Учитывать праздники';
 
   @override

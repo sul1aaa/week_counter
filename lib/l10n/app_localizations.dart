@@ -788,6 +788,54 @@ abstract class AppLocalizations {
   /// **'Other lines'**
   String get jokesMore;
 
+  /// No description provided for @countdownsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Countdowns'**
+  String get countdownsTitle;
+
+  /// No description provided for @countdownsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Count down to your own dates'**
+  String get countdownsEmptyTitle;
+
+  /// No description provided for @countdownsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A trip, a birthday, the end of probation'**
+  String get countdownsEmptyBody;
+
+  /// No description provided for @countdownAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add countdown'**
+  String get countdownAdd;
+
+  /// No description provided for @countdownNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New countdown'**
+  String get countdownNew;
+
+  /// No description provided for @countdownEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit countdown'**
+  String get countdownEdit;
+
+  /// No description provided for @countdownTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you waiting for?'**
+  String get countdownTitleHint;
+
+  /// No description provided for @countdownDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get countdownDelete;
+
   /// No description provided for @hintCountryTitle.
   ///
   /// In en, this message translates to:
