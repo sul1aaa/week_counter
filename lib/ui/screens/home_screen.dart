@@ -123,6 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
         final week = weekOf(today, firstWeekday(context));
         final countable = state is CountingDown || state is OffNow;
         final orbSize = (width * 0.54).clamp(176, 240).toDouble();
+        final earned = _controller.earnedToday(now);
 
         return AppPage(
           largeTitle: false,
@@ -159,7 +160,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             const SizedBox(height: 20),
             _OrbPager(
-              height: orbSize + DayOrb.textHeight,
+              height:
+                  orbSize +
+                  DayOrb.textHeight +
+                  (earned == null ? 0 : DayOrb.moneyHeight),
               pages: [
                 _OrbSection(
                   state: state,
@@ -168,7 +172,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   showTip: !_controller.prefs.orbTipDone && shown.length > 1,
                   onTap: shown.length > 1 ? () => _nextJoke(1) : null,
                 ),
-                DayOrb(shift: snapshot.dayShift, now: now, size: orbSize),
+                DayOrb(
+                  shift: snapshot.dayShift,
+                  now: now,
+                  size: orbSize,
+                  earned: earned,
+                ),
               ],
             ),
             if (countable) ...[

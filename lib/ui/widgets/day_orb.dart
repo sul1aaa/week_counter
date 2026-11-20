@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../domain/countdown_engine.dart';
+import '../../domain/earnings.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/labels.dart';
 import '../kit/countdown_text.dart';
@@ -16,6 +17,7 @@ class DayOrb extends StatelessWidget {
     required this.shift,
     required this.now,
     required this.size,
+    this.earned,
   });
 
   /// Null on a day off.
@@ -23,8 +25,14 @@ class DayOrb extends StatelessWidget {
   final DateTime now;
   final double size;
 
+  /// Money earned in the shift so far; null when the money ticker is off.
+  final Earned? earned;
+
   /// Room under the orb for the two lines of text.
   static const textHeight = 10.0 + 36 + 4 + 16;
+
+  /// Extra room for the money line, when [earned] is shown.
+  static const moneyHeight = 8.0 + 24;
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +96,44 @@ class DayOrb extends StatelessWidget {
           height: 16,
           child: Text(subtitle, style: t.mono.copyWith(fontSize: 12)),
         ),
+        if (earned case final earned?) ...[
+          const SizedBox(height: 8),
+          _Money(earned),
+        ],
       ],
+    );
+  }
+}
+
+/// "₸4,230 earned today" in a pill, lime once the first coin is in.
+class _Money extends StatelessWidget {
+  const _Money(this.earned);
+
+  final Earned earned;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final t = context.tokens;
+    final started = earned.amount > 0;
+    return Container(
+      height: 24,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      alignment: Alignment.center,
+      decoration: ShapeDecoration(
+        color: started ? t.limeSoft : t.surface2,
+        shape: const StadiumBorder(),
+      ),
+      child: Text(
+        l10n.moneyEarnedToday(
+          l10n.money(earned.amount, earned.currency, cents: earned.cents),
+        ),
+        style: t.mono.copyWith(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: started ? t.limeInk : t.ink2,
+        ),
+      ),
     );
   }
 }

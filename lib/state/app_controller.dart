@@ -8,11 +8,13 @@ import '../core/calendar_date.dart';
 import '../domain/awards.dart';
 import '../domain/countdown_engine.dart';
 import '../domain/day_classifier.dart';
+import '../domain/earnings.dart';
 import '../domain/widget_payload.dart';
 import '../l10n/app_localizations.dart';
 import '../models/app_settings.dart';
 import '../models/countdown.dart';
 import '../models/holiday.dart';
+import '../models/pay.dart';
 import '../models/work_schedule.dart';
 import '../services/holiday_repository.dart';
 import '../services/local_store.dart';
@@ -60,6 +62,9 @@ class AppController extends ChangeNotifier {
   late CountdownEngine _engine;
   late CountdownSnapshot _snapshot;
   String? _freshAward;
+
+  /// Work hours per (year, month), for spreading a monthly salary.
+  final Map<(int, int), double> _monthHours = {};
 
   AppSettings get settings => _settings;
   HolidayCalendar get holidays => _holidays;
@@ -124,6 +129,33 @@ class AppController extends ChangeNotifier {
 
   Future<void> setConfetti(bool on) =>
       _updatePrefs(_prefs.copyWith(confetti: on));
+
+  /// Pay doesn't move the countdown, so nothing is recomputed.
+  Future<void> setPay(Pay pay) {
+    _settings = _settings.copyWith(pay: pay);
+    notifyListeners();
+    return _settingsRepository.save(_settings);
+  }
+
+  /// Money earned in the day orb's shift by [now]. Null when the ticker is
+  /// off or there's no shift today.
+  Earned? earnedToday(DateTime now) {
+    final pay = _settings.pay;
+    final shift = _snapshot.dayShift;
+    if (pay == null || !pay.ticks || shift == null) return null;
+    // An overnight shift belongs to the day, and month, it starts on.
+    final day = CalendarDate.fromDateTime(shift.start);
+    final hours = _monthHours.putIfAbsent((
+      day.year,
+      day.month,
+    ), () => monthWorkHours(_engine.classifier, day));
+    final perHour = hourlyRate(pay, hours);
+    return Earned(
+      amount: earnedIn(shift, now, perHour),
+      perHour: perHour,
+      currency: pay.currency,
+    );
+  }
 
   /// The vacation that is on now or comes next.
   ({CalendarDate first, CalendarDate last})? get vacation {
@@ -446,6 +478,7 @@ class AppController extends ChangeNotifier {
         overrides: _settings.overrides,
       ),
     );
+    _monthHours.clear();
     _snapshot = _engine.snapshot(clock());
     notifyListeners();
     unawaited(_pushWidget());

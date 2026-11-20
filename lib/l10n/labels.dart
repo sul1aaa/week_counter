@@ -137,4 +137,16 @@ extension Labels on AppLocalizations {
     if (hours > 0) return '$hours$hourShort $minutes$minuteShort';
     return '$minutes$minuteShort';
   }
+
+  /// "₸4,230", "4 230 ₸", or "$12.57" with [cents]. Rounded down, so the
+  /// ticker never shows money not yet earned.
+  String money(double amount, String currency, {bool cents = false}) {
+    final digits = cents ? 2 : 0;
+    final scale = cents ? 100 : 1;
+    return NumberFormat.currency(
+      locale: localeName,
+      symbol: currency,
+      decimalDigits: digits,
+    ).format((amount * scale).floor() / scale).trim();
+  }
 }
